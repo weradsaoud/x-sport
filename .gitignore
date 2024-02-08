@@ -363,12 +363,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Asup.Api/wwwroot/UploadedExcels
-/Asup.Api/bin
-/Asup.Api/obj
-/Asup.Core/bin
-/Asup.Core/obj
-/Asup.Dtos/bin
-/Asup.Dtos/obj
-/Asup.Api/Resources/Reports/estimation_WN - Wheelloader Kramer 2020.pdf
-/Asup.Api/wwwroot/UploadedExcels/WN - Wheelloader Kramer 2020_638026508741766213.xlsm
+/Xsport.API/wwwroot/UploadedExcels
+/Xsport.API/bin
+/Xsport.API/obj
+

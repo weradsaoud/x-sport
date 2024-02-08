@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace resevation_be.Controllers;
+namespace Xsport.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
@@ -14,6 +14,10 @@ public class TestController : ControllerBase
     [HttpGet]
     public string Test()
     {
+        foreach (var item in User.Claims)
+        {
+            
+        }
         return "hello";
     }
 }
