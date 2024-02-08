@@ -1,11 +1,20 @@
+using Microsoft.EntityFrameworkCore;
 using Xsport.API.Authentication;
+using Xsport.Db;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(
+                    connectionString
+                ).EnableSensitiveDataLogging()
+            );
 
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(options =>
