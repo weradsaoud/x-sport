@@ -25,6 +25,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Xsport.DB\Xsport.DB.csproj" />
+    <ProjectReference Include="..\Xsport.Core\Xsport.Core.csproj" />
+    <ProjectReference Include="..\Xsport.DTOs\Xsport.DTOs.csproj" />
   </ItemGroup>
 
 </Project>

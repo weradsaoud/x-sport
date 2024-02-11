@@ -6,8 +6,8 @@ public class XsportUser
     public string? Name { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
-    public decimal Longitude { get; set; }
-    public decimal Latitude { get; set; }
+    public decimal? Longitude { get; set; }
+    public decimal? Latitude { get; set; }
     public string? ImagePath { get; set; }
 
     public ICollection<UserType>? UserTypes { get; set; }

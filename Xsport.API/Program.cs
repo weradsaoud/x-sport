@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Xsport.API.Authentication;
+using Xsport.Core;
 using Xsport.Db;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,8 @@ builder.Services.AddAuthentication(options =>
     options.AddScheme<AuthenticationHandler>("Firebase", "FireBaseAuth");
     options.DefaultScheme = "Firebase";
 });
+
+builder.Services.AddScoped<IUserServices, UserServices>();
 
 var app = builder.Build();
 
