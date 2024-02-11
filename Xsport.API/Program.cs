@@ -12,7 +12,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(
-                    connectionString
+                    connectionString,
+                    b => b.MigrationsAssembly("Xsport.API")
                 ).EnableSensitiveDataLogging()
             );
 
