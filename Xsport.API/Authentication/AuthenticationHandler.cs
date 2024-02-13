@@ -6,7 +6,7 @@ namespace Xsport.API.Authentication;
 
 class AuthenticationHandler : IAuthenticationHandler
 {
-    private HttpContext? httpContext;
+    private HttpContext httpContext = null!;
     private AuthenticationScheme? authenticationScheme;
 
     public async Task<AuthenticateResult> AuthenticateAsync()
@@ -16,22 +16,24 @@ class AuthenticationHandler : IAuthenticationHandler
         // FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
         // string Uid = decodedToken.Uid;
         //get user + roles
-        Claim c1 = new Claim(ClaimTypes.Name, idToken);
+        Claim c1 = new(ClaimTypes.Name, idToken);
         ClaimsIdentity idten1 = new ClaimsIdentity("UserName");
         idten1.AddClaim(c1);
         ClaimsPrincipal p = new ClaimsPrincipal(idten1);
-        AuthenticationTicket ticket = new AuthenticationTicket(p, authenticationScheme?.Name ?? string.Empty);
+        AuthenticationTicket ticket = new(p, authenticationScheme?.Name ?? string.Empty);
         return await Task.FromResult(AuthenticateResult.Success(ticket));
     }
 
     public Task ChallengeAsync(AuthenticationProperties? properties)
     {
-        throw new NotImplementedException();
+        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
     }
 
     public Task ForbidAsync(AuthenticationProperties? properties)
     {
-        throw new NotImplementedException();
+        httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
     }
 
     public Task InitializeAsync(AuthenticationScheme scheme, HttpContext context)

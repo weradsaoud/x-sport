@@ -10,5 +10,7 @@ public class XsportUser
     public decimal? Latitude { get; set; }
     public string? ImagePath { get; set; }
 
-    public ICollection<UserType>? UserTypes { get; set; }
+    public ICollection<UserType> UserTypes { get; set; } = null!;
+    public ICollection<UserSport> UserSports { get; set; } = null!;
+    public ICollection<UserMatch>? UserMatchs { get; set; }
 }

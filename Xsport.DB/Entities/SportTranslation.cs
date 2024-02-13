@@ -10,6 +10,6 @@ public class SportTranslation
     [Required]
     public long LanguageId { get; set; }
 
-    public Sport? Sport { get; set; }
-    public Language? Language { get; set; }
+    public Sport Sport { get; set; } = null!;
+    public Language Language { get; set; } =null!;
 }

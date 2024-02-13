@@ -11,5 +11,5 @@ public class SportPreferenceTranslation
     public long LanguageId { get; set; }
 
     public SportPreference? SportPreference { get; set; }
-    public Language? Language { get; set; }
+    public Language Language { get; set; } =null!;
 }

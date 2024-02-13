@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Xsport.DTOs\Xsport.DTOs.csproj" />
     <ProjectReference Include="..\Xsport.DB\Xsport.DB.csproj" />
+    <ProjectReference Include="..\Xsport.Common\Xsport.Common.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
