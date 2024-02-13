@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xsport.Core", "Xsport.Core\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xsport.DTOs", "Xsport.DTOs\Xsport.DTOs.csproj", "{5E56E9FA-3C85-4732-8CDF-6CFAF2902028}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xsport.Common", "Xsport.Common\Xsport.Common.csproj", "{6B280E97-72BE-4498-850E-9B313F8DC451}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{5E56E9FA-3C85-4732-8CDF-6CFAF2902028}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E56E9FA-3C85-4732-8CDF-6CFAF2902028}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E56E9FA-3C85-4732-8CDF-6CFAF2902028}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B280E97-72BE-4498-850E-9B313F8DC451}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B280E97-72BE-4498-850E-9B313F8DC451}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B280E97-72BE-4498-850E-9B313F8DC451}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B280E97-72BE-4498-850E-9B313F8DC451}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

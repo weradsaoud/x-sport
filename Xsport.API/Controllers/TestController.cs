@@ -1,3 +1,4 @@
+using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Xsport.API.Controllers;
@@ -12,12 +13,12 @@ public class TestController : ControllerBase
     }
 
     [HttpGet]
-    public string Test()
+    public ApiException Test()
     {
         foreach (var item in User.Claims)
         {
-            
+
         }
-        return "hello";
+        throw new ApiException("it is ok", 500, "1002");
     }
 }

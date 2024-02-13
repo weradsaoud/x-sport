@@ -4,6 +4,7 @@ namespace Xsport.DB.Entities;
 public class SportPreferenceValue
 {
     public long SportPreferenceValueId { get; set; }
+    public string Name { get; set; } = null!;
     [Required]
     public long SportPreferenceId { get; set; }
 

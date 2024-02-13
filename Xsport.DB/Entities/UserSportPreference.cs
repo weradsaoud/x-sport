@@ -12,6 +12,6 @@ public class UserSportPreference
     public long SportPreferenceValueId { get; set; }
 
     public UserSport? UserSport { get; set; }
-    public SportPreference? SportPreference { get; set; }
+    public SportPreference SportPreference { get; set; } = null!;
     public SportPreferenceValue? SportPreferenceValue { get; set; }
 }
