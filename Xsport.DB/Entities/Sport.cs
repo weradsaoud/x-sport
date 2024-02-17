@@ -16,4 +16,5 @@ public class Sport
     public ICollection<UserType>? UserTypes { get; set; }
     public ICollection<SportTranslation> SportTranslations { get; set; } = null!;
     public ICollection<Match>? Matches { get; set; }
+    public ICollection<SportPreference> SportPreferences { get; set; } = null!;
 }

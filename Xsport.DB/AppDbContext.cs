@@ -1,8 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Xsport.DB.Entities;
 namespace Xsport.Db;
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext : DbContext
 {
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+        //this.Database.CommandTimeout = 180; // Timeout duration in seconds
+        this.Database.SetCommandTimeout(TimeSpan.FromSeconds(1000));
+    }
     public DbSet<XsportUser> XsportUsers { get; set; }
     public DbSet<Sport> Sports { get; set; }
     public DbSet<Xsport.DB.Entities.Type> Types { get; set; }
