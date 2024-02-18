@@ -43,5 +43,18 @@ public class UserController : BaseController
             throw new ApiException(ex.Message, 500);
         }
     }
+    [HttpPost]
+    public async Task<UserProfileDto> GetUserProfile()
+    {
+        try
+        {
+            var userProfile = await _userServices.GetUserProfile(Uid, CurrentLanguageId);
+            return userProfile;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 
 }

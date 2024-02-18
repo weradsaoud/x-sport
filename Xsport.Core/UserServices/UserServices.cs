@@ -49,18 +49,25 @@ public class UserServices : IUserServices
         await _db.AddAsync<XsportUser>(xsportUser);
         await _db.SaveChangesAsync();
 
-
-        return _db.Sports.Select(sport => new SportDto()
+        try
         {
-            SportId = sport.SportId,
-            Name = sport.SportTranslations
-            .Where(t => t != null && t.LanguageId == currentLanguageId)
-            .DefaultIfEmpty(new SportTranslation { Name = string.Empty })
-            .First().Name ?? string.Empty
-        }).ToList();
+            return _db.Sports.Select(sport => new SportDto()
+            {
+                SportId = sport.SportId,
+                Name = sport.SportTranslations
+                .Where(t => t != null)
+                .Where(t => t.LanguageId == currentLanguageId)
+                .First().Name ?? string.Empty
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+
     }
 
-    private async Task<UserProfileDto> GetUserProfile(string uId, short currentLanguageId)
+    public async Task<UserProfileDto> GetUserProfile(string uId, short currentLanguageId)
     {
         XsportUser? user = null;
         try
