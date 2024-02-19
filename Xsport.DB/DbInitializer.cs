@@ -43,7 +43,6 @@ namespace Xsport.DB
                             new SportTranslation { LanguageId = 1, SportId = 1, Name = "Football"},
                             new SportTranslation { LanguageId = 2, SportId = 1, Name = "كرة القدم" }
                         },
-                        SportPreferences = []
                     },
                     new Sport
                     {
@@ -81,10 +80,9 @@ namespace Xsport.DB
                             new() { LanguageId = 2, SportId = 2, Name = "البادل" }
                         ]
                     });
+                context.SaveChanges();
             }
             #endregion
-
-
         }
     }
 }

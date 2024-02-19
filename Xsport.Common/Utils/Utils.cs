@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 namespace Xsport.Common.Utils;
 public static class Utils
 {
+
     public static async Task<string> UploadImageFileAsync(IFormFile file, long loggedInUserId, IWebHostEnvironment env)
     {
         string folderPath = env.WebRootPath + XsportConstants.ImagesPath;
