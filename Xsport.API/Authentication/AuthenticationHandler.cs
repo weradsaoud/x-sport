@@ -11,15 +11,24 @@ class AuthenticationHandler : IAuthenticationHandler
 
     public async Task<AuthenticateResult> AuthenticateAsync()
     {
-        string? idToken = httpContext?.Request.Headers.Authorization;
-        if (string.IsNullOrEmpty(idToken)) return await Task.FromResult(AuthenticateResult.NoResult());
-        // FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
-        // string Uid = decodedToken.Uid;
-        //get user + roles
-        Claim c1 = new(ClaimTypes.Name, idToken);
-        ClaimsIdentity idten1 = new ClaimsIdentity("UserName");
-        idten1.AddClaim(c1);
-        ClaimsPrincipal p = new ClaimsPrincipal(idten1);
+        string? _idToken = httpContext?.Request.Headers.Authorization;
+        if (string.IsNullOrEmpty(_idToken)) return await Task.FromResult(AuthenticateResult.NoResult());
+        string idToken = _idToken.Replace("Bearer ", "");
+        string Uid;
+        try
+        {
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+            Uid = decodedToken.Uid;
+        }
+        catch (Exception ex)
+        {
+            return await Task.FromResult(AuthenticateResult.NoResult());
+        }
+        if (string.IsNullOrEmpty(Uid)) return await Task.FromResult(AuthenticateResult.NoResult());
+        Claim UidClaim = new(ClaimTypes.Authentication, Uid);
+        ClaimsIdentity ident = new ClaimsIdentity("Uid");
+        ident.AddClaim(UidClaim);
+        ClaimsPrincipal p = new ClaimsPrincipal(ident);
         AuthenticationTicket ticket = new(p, authenticationScheme?.Name ?? string.Empty);
         return await Task.FromResult(AuthenticateResult.Success(ticket));
     }

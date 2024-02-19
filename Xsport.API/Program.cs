@@ -6,9 +6,12 @@ using Xsport.Db;
 using Asup.Api.AutoWrapperCustomClasses;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xsport.DB.Entities;
+using FirebaseAdmin;
+using Microsoft.AspNetCore;
+using Xsport.DB;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("AWSConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -34,6 +37,9 @@ builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddScoped<IUserServices, UserServices>();
 
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
+builder.Services.AddSingleton(FirebaseApp.Create());
+
 var app = builder.Build();
 
 //seed database
@@ -44,34 +50,27 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        if (!context.Languages.Any())
-        {
-            context.Languages.AddRange(
-                new Language { LanguageId = 1, Code = "en", Name = "English" },
-                new Language { LanguageId = 2, Code = "ar", Name = "العربية" }
-            );
-            context.SaveChanges();
-        }
+        DbInitializer.Seed(context);
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        // var logger = services.GetRequiredService<ILogger<Program>>();
+        // logger.LogError(ex, "An error occurred while seeding the database.");
     }
-
-    // Configure the HTTP request pipeline.
-    app.UseCors(x => x
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) // allow any origin
-                .AllowCredentials()); // allow credentials
+}
+// Configure the HTTP request pipeline.
+app.UseCors(x => x
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .SetIsOriginAllowed(origin => true) // allow any origin
+            .AllowCredentials()); // allow credentials
 app.UseStaticFiles();
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-app.UseSwagger();
+if (app.Environment.IsDevelopment())
+    //{
+    //    app.UseSwagger();
+    //    app.UseSwaggerUI();
+    //}
+    app.UseSwagger();
 app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 app.UseAuthentication();

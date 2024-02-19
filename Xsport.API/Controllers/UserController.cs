@@ -9,6 +9,7 @@ namespace Xsport.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
+[Authorize]
 public class UserController : BaseController
 {
     private IUserServices _userServices;

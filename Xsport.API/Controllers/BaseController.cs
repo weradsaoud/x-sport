@@ -6,6 +6,6 @@ namespace Xsport.API.Controllers;
 public abstract class BaseController : ControllerBase
 {
     protected string Culture => Request.Headers["culture"].ToString();
-    protected short CurrentLanguageId => (Culture == "de") ? (short)LanguagesEnum.Arabic : (short)LanguagesEnum.English;
-    protected string Uid => "FIRSTUID";//User.FindFirst(ClaimTypes.Authentication)?.Value ?? string.Empty;
+    protected short CurrentLanguageId => (Culture == "ar") ? (short)LanguagesEnum.Arabic : (short)LanguagesEnum.English;
+    protected string Uid => User.FindFirst(ClaimTypes.Authentication)?.Value ?? string.Empty;
 }
