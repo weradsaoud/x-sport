@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using AutoWrapper.Wrappers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Xsport.Core;
 using Xsport.DTOs.UserDtos;
 
@@ -9,7 +11,6 @@ namespace Xsport.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-[Authorize]
 public class UserController : BaseController
 {
     private IUserServices _userServices;
@@ -19,24 +20,51 @@ public class UserController : BaseController
     }
 
     [HttpPost]
-    public async Task<List<SportDto>> Register([FromBody] UserRegistrationDto user)
+    public async Task<RegisterResponseDto> Register([FromBody] UserRegistrationDto user)
     {
-        try
+        if (ModelState.IsValid)
         {
-            var sports = await _userServices.Register(user, Uid, CurrentLanguageId);
-            return sports;
+            try
+            {
+                return await _userServices.Register(user, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            throw new ApiException(ex.Message, 500);
+            throw new ApiException("Invalid Inputs");
         }
     }
+    [HttpPost]
+    public async Task<LoginResponseDto> Login([FromBody] UserLoginRequest userLoginRequest)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _userServices.LoginAsync(userLoginRequest, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs");
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
     public async Task<UserProfileDto> CompleteRegistration([FromForm] CompleteRegistrationDto dto)
     {
         try
         {
-            var userProfile = await _userServices.CompleteRegistration(dto, Uid, CurrentLanguageId);
+            if (LoggedInUser == null) throw new ApiException("You are not logged in");
+            var userProfile = await _userServices.CompleteRegistration(dto, LoggedInUser.Id, CurrentLanguageId);
             return userProfile;
         }
         catch (Exception ex)
@@ -44,12 +72,14 @@ public class UserController : BaseController
             throw new ApiException(ex.Message, 500);
         }
     }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
     public async Task<UserProfileDto> GetUserProfile()
     {
         try
         {
-            var userProfile = await _userServices.GetUserProfile(Uid, CurrentLanguageId);
+            if (LoggedInUser == null) throw new Exception("You are not logged in");
+            var userProfile = await _userServices.GetUserProfile(LoggedInUser.Id, CurrentLanguageId);
             return userProfile;
         }
         catch (Exception ex)
