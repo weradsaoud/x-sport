@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.Db;
@@ -11,9 +12,11 @@ using Xsport.Db;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240221175022_finai_for_identity")]
+    partial class finai_for_identity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,53 +156,6 @@ namespace Xsport.API.Migrations
                     b.ToTable("Languages");
                 });
 
-            modelBuilder.Entity("Xsport.DB.Entities.Level", b =>
-                {
-                    b.Property<long>("LevelId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("LevelId"));
-
-                    b.Property<int>("MaxPoints")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("SportId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("LevelId");
-
-                    b.HasIndex("SportId");
-
-                    b.ToTable("Levels");
-                });
-
-            modelBuilder.Entity("Xsport.DB.Entities.LevelTranslation", b =>
-                {
-                    b.Property<long>("LevelTranslationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("LevelTranslationId"));
-
-                    b.Property<long>("LanguageId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("LevelId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("LevelTranslationId");
-
-                    b.HasIndex("LanguageId");
-
-                    b.HasIndex("LevelId");
-
-                    b.ToTable("LevelTranslations");
-                });
-
             modelBuilder.Entity("Xsport.DB.Entities.Match", b =>
                 {
                     b.Property<long>("MatchId")
@@ -222,44 +178,6 @@ namespace Xsport.API.Migrations
                     b.HasIndex("SportId");
 
                     b.ToTable("Match");
-                });
-
-            modelBuilder.Entity("Xsport.DB.Entities.RefreshToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("JwtId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.Sport", b =>
@@ -596,8 +514,8 @@ namespace Xsport.API.Migrations
                     b.Property<decimal?>("Longitude")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("LoyaltyPoints")
-                        .HasColumnType("integer");
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -608,6 +526,9 @@ namespace Xsport.API.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Phone")
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
@@ -704,36 +625,6 @@ namespace Xsport.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Xsport.DB.Entities.Level", b =>
-                {
-                    b.HasOne("Xsport.DB.Entities.Sport", "Sport")
-                        .WithMany("Levels")
-                        .HasForeignKey("SportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Sport");
-                });
-
-            modelBuilder.Entity("Xsport.DB.Entities.LevelTranslation", b =>
-                {
-                    b.HasOne("Xsport.DB.Entities.Language", "Language")
-                        .WithMany("LevelTranslations")
-                        .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Xsport.DB.Entities.Level", "Level")
-                        .WithMany("LevelTranslations")
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Language");
-
-                    b.Navigation("Level");
-                });
-
             modelBuilder.Entity("Xsport.DB.Entities.Match", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.Sport", "Sport")
@@ -743,17 +634,6 @@ namespace Xsport.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Sport");
-                });
-
-            modelBuilder.Entity("Xsport.DB.Entities.RefreshToken", b =>
-                {
-                    b.HasOne("Xsport.DB.Entities.XsportUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.SportPreference", b =>
@@ -932,8 +812,6 @@ namespace Xsport.API.Migrations
 
             modelBuilder.Entity("Xsport.DB.Entities.Language", b =>
                 {
-                    b.Navigation("LevelTranslations");
-
                     b.Navigation("SportPreferenceTranslations");
 
                     b.Navigation("SportPreferenceValueTranslations");
@@ -943,11 +821,6 @@ namespace Xsport.API.Migrations
                     b.Navigation("XsportRoleTranslations");
                 });
 
-            modelBuilder.Entity("Xsport.DB.Entities.Level", b =>
-                {
-                    b.Navigation("LevelTranslations");
-                });
-
             modelBuilder.Entity("Xsport.DB.Entities.Match", b =>
                 {
                     b.Navigation("UserMatchs");
@@ -955,8 +828,6 @@ namespace Xsport.API.Migrations
 
             modelBuilder.Entity("Xsport.DB.Entities.Sport", b =>
                 {
-                    b.Navigation("Levels");
-
                     b.Navigation("Matches");
 
                     b.Navigation("SportPreferences");

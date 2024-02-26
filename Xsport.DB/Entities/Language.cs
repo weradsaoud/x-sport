@@ -6,7 +6,8 @@ public class Language
     public string? Name { get; set; }
 
     public ICollection<SportTranslation>? SportTranslations { get; set; }
-    public ICollection<TypeTranslation>? TypeTranslations { get; set; }
+    public ICollection<XsportRoleTranslation>? XsportRoleTranslations { get; set; }
     public ICollection<SportPreferenceTranslation>? SportPreferenceTranslations { get; set; }
     public ICollection<SportPreferenceValueTranslation>? SportPreferenceValueTranslations { get; set; }
+    public ICollection<LevelTranslation> LevelTranslations { get; set; } = null!;
 }

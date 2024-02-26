@@ -13,8 +13,9 @@ public class Sport
     public bool HasExtraRounds { get; set; }
     public int NumOfExtraRounds { get; set; }
 
-    public ICollection<UserType>? UserTypes { get; set; }
+    public ICollection<UserRole>? UserRoles { get; set; }
     public ICollection<SportTranslation> SportTranslations { get; set; } = null!;
     public ICollection<Match>? Matches { get; set; }
     public ICollection<SportPreference> SportPreferences { get; set; } = null!;
+    public ICollection<Level> Levels { get; set; } = null!;
 }

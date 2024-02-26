@@ -10,6 +10,7 @@ namespace Xsport.DTOs.UserDtos
     public class UserInfo
     {
         public long UserId { get; set; }
+        public int LoyaltyPoints { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
@@ -27,6 +28,8 @@ namespace Xsport.DTOs.UserDtos
     {
         public long CurrentSportId { get; set; }
         public int Points { get; set; }
+        public int LevelPercent { get; set; }
+        public string UserLevel{ get; set; }=null!;
         public List<CurrentSportPreference>? Preferences { get; set; }
         public int NumOfMatchs { get; set; }
     }
@@ -34,7 +37,11 @@ namespace Xsport.DTOs.UserDtos
     {
         public long SportPreferenceId { get; set; }
         public string SportPreferenceName { get; set; } = null!;
+        public List<SportPreferenceValue> SportPreferenceValues { get; set; } = null!;
         public long SportPreferenceValueId { get; set; }
-        public string SportPreferenceValue { get; set; } = null!;
     }
+    public class SportPreferenceValue
+    {
+        public long SportPreferenceValueId { get; set; }
+        public string SportPreferenceValueName { get;set; } = null!;
 }

@@ -12,6 +12,6 @@ public class UserSport
     public long SportId { get; set; }
 
     public XsportUser? XsportUser { get; set; }
-    public Sport? Sport { get; set; }
+    public Sport Sport { get; set; } = null!;
     public ICollection<UserSportPreference> UserSportPreferences { get; set; } = null!;
 }
