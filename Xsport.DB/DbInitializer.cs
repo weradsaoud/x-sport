@@ -43,6 +43,39 @@ namespace Xsport.DB
                             new SportTranslation { LanguageId = 1, SportId = 1, Name = "Football"},
                             new SportTranslation { LanguageId = 2, SportId = 1, Name = "كرة القدم" }
                         },
+                        Levels = new List<Level>()
+                        {
+                            new Level()
+                            {
+                                LevelId = 1,
+                                MaxPoints = 1000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=1, Name = "Starter"},
+                                    new LevelTranslation{LanguageId=2, LevelId =1, Name = "مبتدئ"}
+                                }
+                            },
+                            new Level()
+                            {
+                                LevelId = 2,
+                                MaxPoints = 3000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=2, Name = "Intermediate"},
+                                    new LevelTranslation{LanguageId=2, LevelId =2, Name = "هاوٍ"}
+                                }
+                            },
+                            new Level()
+                            {
+                                LevelId = 3,
+                                MaxPoints = 5000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=3, Name = "Expert"},
+                                    new LevelTranslation{LanguageId=2, LevelId =3, Name = "متمرس"}
+                                }
+                            }
+                        }
                     },
                     new Sport
                     {
@@ -59,8 +92,41 @@ namespace Xsport.DB
                         NumOfReferees = 3,
                         SportTranslations = [
                             new() { LanguageId = 1, SportId = 2, Name = "Tennis"},
-                            new() { LanguageId = 2, SportId = 2, Name = "التنس" }
-                        ]
+                            new() { LanguageId = 2, SportId = 2, Name = "تنس" }
+                        ],
+                        Levels = new List<Level>()
+                        {
+                            new Level()
+                            {
+                                LevelId = 4,
+                                MaxPoints = 1000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=4, Name = "Starter"},
+                                    new LevelTranslation{LanguageId=2, LevelId =4, Name = "مبتدئ"}
+                                }
+                            },
+                            new Level()
+                            {
+                                LevelId = 5,
+                                MaxPoints = 3000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=5, Name = "Intermediate"},
+                                    new LevelTranslation{LanguageId=2, LevelId =5, Name = "هاوٍ"}
+                                }
+                            },
+                            new Level()
+                            {
+                                LevelId = 6,
+                                MaxPoints = 5000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=6, Name = "Expert"},
+                                    new LevelTranslation{LanguageId=2, LevelId =6, Name = "متمرس"}
+                                }
+                            }
+                        }
                     },
                     new Sport
                     {
@@ -77,8 +143,41 @@ namespace Xsport.DB
                         NumOfReferees = 3,
                         SportTranslations = [
                             new() { LanguageId = 1, SportId = 2, Name = "Paddel"},
-                            new() { LanguageId = 2, SportId = 2, Name = "البادل" }
-                        ]
+                            new() { LanguageId = 2, SportId = 2, Name = "بادل" }
+                        ],
+                        Levels = new List<Level>()
+                        {
+                            new Level()
+                            {
+                                LevelId = 7,
+                                MaxPoints = 1000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=7, Name = "Starter"},
+                                    new LevelTranslation{LanguageId=2, LevelId =7, Name = "مبتدئ"}
+                                }
+                            },
+                            new Level()
+                            {
+                                LevelId = 8,
+                                MaxPoints = 3000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=8, Name = "Intermediate"},
+                                    new LevelTranslation{LanguageId=2, LevelId =8, Name = "هاوٍ"}
+                                }
+                            },
+                            new Level()
+                            {
+                                LevelId = 9,
+                                MaxPoints = 5000,
+                                LevelTranslations = new List<LevelTranslation>()
+                                {
+                                    new LevelTranslation {LanguageId=1, LevelId=9, Name = "Expert"},
+                                    new LevelTranslation{LanguageId=2, LevelId =9, Name = "متمرس"}
+                                }
+                            }
+                        }
                     });
                 context.SaveChanges();
             }

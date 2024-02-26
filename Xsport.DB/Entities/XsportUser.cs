@@ -8,6 +8,7 @@ public class XsportUser: IdentityUser<long>
     //public string? Name { get; set; }
     //public string? Email { get; set; }
     //public string? Phone { get; set; }
+    public int LoyaltyPoints { get; set; }
     public decimal? Longitude { get; set; }
     public decimal? Latitude { get; set; }
     public string? ImagePath { get; set; }

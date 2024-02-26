@@ -16,10 +16,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using Xsport.Common.Configurations;
+using Xsport.Core.EmailServices.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Xsport.Core.EmailServices;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("AWSConnection");
-string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer")??string.Empty;
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);
 var tokenValidationParameters = new TokenValidationParameters
@@ -33,6 +36,7 @@ var tokenValidationParameters = new TokenValidationParameters
     ClockSkew = System.TimeSpan.Zero,
     IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes)
 };
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,9 +82,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
                     b => b.MigrationsAssembly("Xsport.API")
                 ).EnableSensitiveDataLogging()
             );
-builder.Services.AddIdentity<XsportUser, XsportRole>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
+builder.Services.AddIdentity<XsportUser, XsportRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = true;
+})
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 builder.Services.AddControllers();
 //builder.Services.AddAuthentication(options =>
 //{
@@ -104,7 +112,10 @@ builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 builder.Services.Configure<GeneralConfig>(builder.Configuration.GetSection("GeneralConfig"));
 
+builder.Services.AddSingleton(emailConfig);
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
 builder.Services.AddSingleton(FirebaseApp.Create());

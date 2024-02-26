@@ -20,7 +20,7 @@ public class UserController : BaseController
     }
 
     [HttpPost]
-    public async Task<RegisterResponseDto> Register([FromBody] UserRegistrationDto user)
+    public async Task<bool> Register([FromBody] UserRegistrationDto user)
     {
         if (ModelState.IsValid)
         {
@@ -36,6 +36,25 @@ public class UserController : BaseController
         else
         {
             throw new ApiException("Invalid Inputs");
+        }
+    }
+    [HttpGet]
+    public async Task<bool> ConfirmUserEmail([FromQuery] ConfirmEmailDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _userServices.ConfirmUserEmail(dto.UserId, dto.Token);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
         }
     }
     [HttpPost]
