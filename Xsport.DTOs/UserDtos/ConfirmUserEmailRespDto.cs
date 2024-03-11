@@ -7,8 +7,9 @@ using Xsport.Common.Models;
 
 namespace Xsport.DTOs.UserDtos
 {
-    public class RegisterResponseDto
+    public class ConfirmUserEmailRespDto
     {
+        public AuthResult AuthResult { get; set; } = null!;
         public List<SportDto> Sports { get; set; } = null!;
     }
 }

@@ -35,21 +35,41 @@ public class UserController : BaseController
         }
         else
         {
-            throw new ApiException("Invalid Inputs");
+            throw new ApiException("Invalid Inputs", 500);
         }
     }
-    [HttpGet]
-    public async Task<bool> ConfirmUserEmail([FromQuery] ConfirmEmailDto dto)
+
+    [HttpPost]
+    public async Task<bool> ResendEmailConfirmationCode([FromBody] UserLoginRequest dto)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                return await _userServices.ConfirmUserEmail(dto.UserId, dto.Token);
+                return await _userServices.ResendEmailConfirmationCode(dto);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    [HttpPost]
+    public async Task<ConfirmUserEmailRespDto> ConfirmUserEmail([FromBody] ConfirmEmailDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _userServices.ConfirmUserEmail(dto, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
             }
         }
         else
@@ -73,9 +93,29 @@ public class UserController : BaseController
         }
         else
         {
-            throw new ApiException("Invalid Inputs");
+            throw new ApiException("Invalid Inputs", 500);
         }
     }
+    [HttpPost]
+    public async Task<LoginResponseDto> GoogleLogin([FromBody] UserGoogleLoginDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _userServices.GoogleLoginAsync(dto, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
     public async Task<UserProfileDto> CompleteRegistration([FromForm] CompleteRegistrationDto dto)
@@ -83,7 +123,22 @@ public class UserController : BaseController
         try
         {
             if (LoggedInUser == null) throw new ApiException("You are not logged in");
-            var userProfile = await _userServices.CompleteRegistration(dto, LoggedInUser.Id, CurrentLanguageId);
+            var res = await _userServices.CompleteRegistration(LoggedInUser.Id, dto, CurrentLanguageId);
+            return res;
+        }
+        catch (Exception ex)
+        {
+            throw new ApiException(ex.Message, 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<UserProfileDto> GetUserProfile()
+    {
+        try
+        {
+            if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+            var userProfile = await _userServices.GetUserProfile(LoggedInUser.Id, CurrentLanguageId);
             return userProfile;
         }
         catch (Exception ex)
@@ -93,18 +148,126 @@ public class UserController : BaseController
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
-    public async Task<UserProfileDto> GetUserProfile()
+    public async Task<UserProfileDto> EditUserProfile([FromForm] EditUserReqDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                return await _userServices.EditUserProfile(LoggedInUser.Id, dto, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide Inputs", 500);
+        }
+
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpDelete]
+    public async Task<bool> DeleteAccount()
     {
         try
         {
-            if (LoggedInUser == null) throw new Exception("You are not logged in");
-            var userProfile = await _userServices.GetUserProfile(LoggedInUser.Id, CurrentLanguageId);
-            return userProfile;
+            if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+            return await _userServices.DeleteAccount(LoggedInUser.Id);
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new ApiException(ex.Message, 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<UserProfileDto> AddFavoriteSports([FromBody] AddFavoriteSportReqDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                var userProfile = await _userServices.AddFavoriteSports(dto, LoggedInUser.Id, CurrentLanguageId);
+                return userProfile;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<UserProfileDto> DeleteFavoriteSports([FromBody] AddFavoriteSportReqDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                var userProfile = await _userServices.DeleteFavoriteSports(dto, LoggedInUser.Id, CurrentLanguageId);
+                return userProfile;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<UserProfileDto> EditPreferences([FromBody] EditPreferencesReqDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                var userProfile = await _userServices.EditPreferences(dto, LoggedInUser.Id, CurrentLanguageId);
+                return userProfile;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide Inputs", 500);
         }
     }
 
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<UserProfileDto> SelectCurrentSport([FromBody] SelectCurrentSportReqDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                return await _userServices.SelectCurrentSport(LoggedInUser.Id, dto.SportId, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide inputs", 500);
+        }
+    }
 }

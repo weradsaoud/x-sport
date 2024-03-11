@@ -23,7 +23,10 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<SportPreferenceTranslation> SportPreferenceTranslations { get; set; }
     public DbSet<SportPreferenceValue> SportPreferenceValues { get; set; }
     public DbSet<SportPreferenceValueTranslation> SportPreferenceValueTranslations { get; set; }
-    public DbSet<UserSportPreference> UserSportPreferences { get; set; }
+    public DbSet<UserSportPreferenceValue> UserSportPreferenceValues { get; set; }
     public DbSet<Level>? Levels { get; set; }
     public DbSet<LevelTranslation> LevelTranslations { get; set; }
+    public DbSet<UserSport> UserSports { get; set; }
+    public DbSet<Match> Matchs { get; set; }
+    public DbSet<UserMatch> UserMatchs { get; set; }
 }

@@ -182,6 +182,471 @@ namespace Xsport.DB
                 context.SaveChanges();
             }
             #endregion
+            #region Preferences
+            if (!context.SportPreferences.Any())
+            {
+                context.SportPreferences.AddRange(
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 1,
+                        SportId = 1,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=1,Name="Favorite Leg"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=1,Name = "القدم المفضلة"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 1,
+                                SportPreferenceId=1,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=1,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=1,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 2,
+                                SportPreferenceId=1,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=2,Name="Left"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=2,Name = "يسار"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 3,
+                                SportPreferenceId=1,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=3,Name="Right"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=3,Name = "يمين"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 2,
+                        SportId = 1,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=2,Name="Favorite Position"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=2,Name = "المركز المفضل"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 4,
+                                SportPreferenceId=2,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=4,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=4,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 5,
+                                SportPreferenceId=2,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=5,Name="Goal keeper"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=5,Name = "حارس مرمى"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 6,
+                                SportPreferenceId=2,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=6,Name="Deffender"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=6,Name = "مدافع"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 7,
+                                SportPreferenceId=2,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=7,Name="Middle line"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=7,Name = "خط وسط"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 8,
+                                SportPreferenceId=2,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=8,Name="Attacker"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=8,Name = "مهاجم"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 3,
+                        SportId = 1,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=3,Name="Favorite time to play"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=3,Name = "الوقت المفضل للعب"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 9,
+                                SportPreferenceId=3,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=9,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=9,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 10,
+                                SportPreferenceId=3,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=10,Name="Morning"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=10,Name = "صباحا"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 11,
+                                SportPreferenceId=3,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=11,Name="After noon"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=11,Name = "ظهرا"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 12,
+                                SportPreferenceId=3,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=12,Name="Evining"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=12,Name = "مساء"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 4,
+                        SportId = 2,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=4,Name="Favorite Hand"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=4,Name = "اليد المفضلة"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 13,
+                                SportPreferenceId=4,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=4,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=4,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 14,
+                                SportPreferenceId=4,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=14,Name="Left"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=14,Name = "يسار"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 15,
+                                SportPreferenceId=4,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=15,Name="Right"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=15,Name = "يمين"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 5,
+                        SportId = 2,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=5,Name="Favorite time to play"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=5,Name = "الوقت المفضل للعب"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 16,
+                                SportPreferenceId=5,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=16,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=16,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 17,
+                                SportPreferenceId=5,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=17,Name="Morning"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=17,Name = "صباحا"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 18,
+                                SportPreferenceId=5,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=11,Name="After noon"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=11,Name = "ظهرا"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 19,
+                                SportPreferenceId=5,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=19,Name="Evining"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=19,Name = "مساء"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 6,
+                        SportId = 2,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=6,Name="Favorite Tennis type"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=6,Name = "نوع التنس المفضل"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 20,
+                                SportPreferenceId=6,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=20,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=20,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 21,
+                                SportPreferenceId=6,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=21,Name="Singles "},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=21,Name = "أفراد"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 22,
+                                SportPreferenceId=6,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=22,Name="Doubles"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=22,Name = "ثنائيات"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 23,
+                                SportPreferenceId=6,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=23,Name="Mixed doubles"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=23,Name = "مختلط"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 7,
+                        SportId = 3,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=7,Name="Favorite Hand"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=7,Name = "اليد المفضلة"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 24,
+                                SportPreferenceId=7,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=24,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=24,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 25,
+                                SportPreferenceId=7,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=25,Name="Left"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=25,Name = "يسار"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 26,
+                                SportPreferenceId=7,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=26,Name="Right"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=26,Name = "يمين"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 8,
+                        SportId = 3,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=8,Name="Favorite time to play"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=8,Name = "الوقت المفضل للعب"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 27,
+                                SportPreferenceId=8,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=27,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=27,Name = "غير مخصص"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 28,
+                                SportPreferenceId=8,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=28,Name="Morning"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=28,Name = "صباحا"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 29,
+                                SportPreferenceId=8,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=29,Name="After noon"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=29,Name = "ظهرا"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 30,
+                                SportPreferenceId=8,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=30,Name="Evining"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=30,Name = "مساء"}
+                                }
+                            }
+                        }
+                    },
+                    new SportPreference()
+                    {
+                        SportPreferenceId = 9,
+                        SportId = 3,
+                        SportPreferenceTranslations = new List<SportPreferenceTranslation>()
+                        {
+                            new SportPreferenceTranslation {LanguageId = 1, SportPreferenceId=9,Name="Favorite position"},
+                            new SportPreferenceTranslation { LanguageId=2, SportPreferenceId=9,Name = "الموقع المفضل"}
+                        },
+                        SportPreferenceValues = new List<SportPreferenceValue>()
+                        {
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 31,
+                                SportPreferenceId=9,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=31,Name="On the right"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=31,Name = "على اليمين"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 32,
+                                SportPreferenceId=9,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=32,Name="On the left"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=32,Name = "على اليسار"}
+                                }
+                            },
+                            new SportPreferenceValue
+                            {
+                                SportPreferenceValueId = 33,
+                                SportPreferenceId=9,
+                                IsNotAssigned = true,
+                                SportPreferenceValueTranslations = new List<SportPreferenceValueTranslation>()
+                                {
+                                    new SportPreferenceValueTranslation {LanguageId = 1, SportPreferenceValueId=33,Name="Not assigned"},
+                                    new SportPreferenceValueTranslation { LanguageId=2,SportPreferenceValueId=33,Name = "غير مخصص"}
+                                }
+                            }
+                        }
+                    }
+
+                 );
+                context.SaveChanges();
+            }
+            #endregion Preferences
         }
     }
 }

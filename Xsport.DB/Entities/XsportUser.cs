@@ -5,15 +5,17 @@ public class XsportUser: IdentityUser<long>
 {
     //public long XsportUserId { get; set; }
     public string? Uid { get; set; }
-    //public string? Name { get; set; }
+    public string? XsportName { get; set; }
     //public string? Email { get; set; }
     //public string? Phone { get; set; }
+    public string? EmailConfirmationCode { get; set; }
     public int LoyaltyPoints { get; set; }
+    public string? Gender { get; set; }
     public decimal? Longitude { get; set; }
     public decimal? Latitude { get; set; }
     public string? ImagePath { get; set; }
 
     //public ICollection<UserRole> UserRoles { get; set; } = null!;
     public ICollection<UserSport> UserSports { get; set; } = null!;
-    public ICollection<UserMatch>? UserMatchs { get; set; }
+    public ICollection<UserMatch> UserMatchs { get; set; } = null!;
 }
