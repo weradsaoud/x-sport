@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xsport.Common.Models;
 
 namespace Xsport.DTOs.UserDtos
 {
-    public class RegisterResponseDto
+    public class SelectCurrentSportReqDto
     {
-        public List<SportDto> Sports { get; set; } = null!;
+        public long SportId { get; set; }
     }
 }

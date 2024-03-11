@@ -19,9 +19,11 @@ using Xsport.Common.Configurations;
 using Xsport.Core.EmailServices.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Xsport.Core.EmailServices;
+using System.Net;
+using Xsport.Core.SportServices;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("AWSConnection");
 string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);
@@ -76,6 +78,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
+    options.HttpsPort = 443; // Default HTTPS port
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(
                     connectionString,
@@ -84,8 +92,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
             );
 builder.Services.AddIdentity<XsportUser, XsportRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedAccount = true;
     options.SignIn.RequireConfirmedEmail = true;
+    options.User.RequireUniqueEmail = true;
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
@@ -115,6 +124,7 @@ builder.Services.Configure<GeneralConfig>(builder.Configuration.GetSection("Gene
 builder.Services.AddSingleton(emailConfig);
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISportServices, SportServices>();
 
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
@@ -139,18 +149,21 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // Configure the HTTP request pipeline.
+app.UseHsts();
+app.UseHttpsRedirection(); // Enable HTTPS redirection
 app.UseCors(x => x
             .AllowAnyMethod()
             .AllowAnyHeader()
             .SetIsOriginAllowed(origin => true) // allow any origin
             .AllowCredentials()); // allow credentials
+
 app.UseStaticFiles();
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
     //{
     //    app.UseSwagger();
     //    app.UseSwaggerUI();
     //}
-    app.UseSwagger();
+app.UseSwagger();
 app.UseSwaggerUI();
 //app.UseHttpsRedirection();
 app.UseAuthentication();

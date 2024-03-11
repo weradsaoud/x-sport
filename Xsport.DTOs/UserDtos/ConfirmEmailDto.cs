@@ -10,9 +10,11 @@ namespace Xsport.DTOs.UserDtos
     public class ConfirmEmailDto
     {
         [Required]
-        public string UserId { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string Token { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        [Required]
+        public string Code { get; set; }
     }
 }

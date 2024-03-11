@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.Db;
@@ -11,9 +12,11 @@ using Xsport.Db;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240226191437_fix_UserSportPreferenceValues_table_name")]
+    partial class fix_UserSportPreferenceValues_table_name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -221,7 +224,7 @@ namespace Xsport.API.Migrations
 
                     b.HasIndex("SportId");
 
-                    b.ToTable("Matchs");
+                    b.ToTable("Match");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.RefreshToken", b =>
@@ -357,8 +360,9 @@ namespace Xsport.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("SportPreferenceValueId"));
 
-                    b.Property<bool?>("IsNotAssigned")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<long>("SportPreferenceId")
                         .HasColumnType("bigint");
@@ -380,10 +384,6 @@ namespace Xsport.API.Migrations
 
                     b.Property<long>("LanguageId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<long>("SportPreferenceValueId")
                         .HasColumnType("bigint");
@@ -446,7 +446,7 @@ namespace Xsport.API.Migrations
 
                     b.HasIndex("XsportUserId");
 
-                    b.ToTable("UserMatchs");
+                    b.ToTable("UserMatch");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.UserSport", b =>
@@ -475,7 +475,7 @@ namespace Xsport.API.Migrations
 
                     b.HasIndex("XsportUserId");
 
-                    b.ToTable("UserSports");
+                    b.ToTable("UserSport");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.UserSportPreferenceValue", b =>
@@ -575,14 +575,8 @@ namespace Xsport.API.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<string>("EmailConfirmationCode")
-                        .HasColumnType("text");
-
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Gender")
-                        .HasColumnType("text");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
@@ -631,9 +625,6 @@ namespace Xsport.API.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
-
-                    b.Property<string>("XsportName")
-                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

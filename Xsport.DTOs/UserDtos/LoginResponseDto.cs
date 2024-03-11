@@ -10,6 +10,6 @@ namespace Xsport.DTOs.UserDtos
     public class LoginResponseDto
     {
         public AuthResult AuthResult { get; set; } = null!;
-        public UserProfileDto UserProfile { get; set; } = null!;
+        public UserProfileDto? UserProfile { get; set; } = null!;
     }
 }

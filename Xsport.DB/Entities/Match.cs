@@ -7,5 +7,5 @@ public class Match
     public long SportId { get; set; }
 
     public Sport? Sport { get; set; }
-    public ICollection<UserMatch>? UserMatchs { get; set; }
+    public ICollection<UserMatch> UserMatchs { get; set; } = null!;
 }

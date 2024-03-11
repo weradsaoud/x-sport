@@ -95,10 +95,10 @@ namespace Xsport.Core.EmailServices
 
                     await client.SendAsync(mailMessage);
                 }
-                catch (Exception) // e)
+                catch (Exception ex) // e)
                 {
                     //log an error message or throw an exception, or both.
-                    throw;
+                    throw new Exception(ex.Message);
                 }
                 finally
                 {

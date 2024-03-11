@@ -16,6 +16,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Xsport.Core.EmailServices.Models;
 using Xsport.Core.EmailServices;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
+using FirebaseAdmin.Auth;
+using Newtonsoft.Json.Linq;
+using MimeKit.Encodings;
 
 namespace Xsport.Core;
 public class UserServices : IUserServices
@@ -40,66 +45,104 @@ public class UserServices : IUserServices
 
     public async Task<bool> Register(UserRegistrationDto user, short currentLanguageId)
     {
-        if (user == null) throw new Exception(UserServiceErrors.bad_request_data);
-        XsportUser xsportUser = new XsportUser()
+        try
         {
-            Email = user.Email,
-            UserName = user.Name,
-            PhoneNumber = user.Phone,
-            LoyaltyPoints = 0,
-            Latitude = user.Latitude,
-            Longitude = user.Longitude,
-            ImagePath = ""
-        };
-        var isCreated = await userManager.CreateAsync(xsportUser, user.Password);
-        if (isCreated.Succeeded)
-        {
-            //send verification e-mail
-            await SendActivationLink(xsportUser);
-            //return registration is successful.
-            return true;
-            //try
-            //{
-            //    var authResult = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
-            //    var sports = _db.Sports.Select(sport => new SportDto()
-            //    {
-            //        SportId = sport.SportId,
-            //        Name = sport.SportTranslations
-            //        .Where(t => t != null)
-            //        .Where(t => t.LanguageId == currentLanguageId)
-            //        .First().Name ?? string.Empty
-            //    }).ToList();
-            //    return new RegisterResponseDto
-            //    {
-            //        Sports = sports,
-            //        AuthResult = authResult
-            //    };
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new Exception(ex.Message);
-            //}
-        }
-        else
-        {
-            string errorMessage = string.Empty;
-            foreach (var item in isCreated.Errors)
+            if (user == null) throw new Exception(UserServiceErrors.bad_request_data);
+            if (user.Email.IsNullOrEmpty()) throw new Exception("Email is required");
+            //check if user exists
+            var existingUser = await userManager.FindByEmailAsync(user.Email);
+            if (existingUser != null) throw new Exception($"{user.Email} is already taken");
+            string confirmationCode = await SendActivationCode(user.Email);
+            if (confirmationCode.IsNullOrEmpty()) throw new Exception("Could not generate confirmation code");
+            XsportUser xsportUser = new XsportUser()
             {
-                errorMessage = "__" + errorMessage + item.Description + "\n";
+                Email = user.Email,
+                UserName = user.Email,
+                XsportName = user.Name,
+                PhoneNumber = user.Phone,
+                LoyaltyPoints = 0,
+                Gender = user.Gender,
+                Latitude = user.Latitude,
+                Longitude = user.Longitude,
+                EmailConfirmationCode = confirmationCode,
+                ImagePath = ""
+            };
+            var isCreated = await userManager.CreateAsync(xsportUser, user.Password);
+            if (!isCreated.Succeeded)
+            {
+                string errorMessage = string.Empty;
+                foreach (var item in isCreated.Errors)
+                {
+                    errorMessage = "__" + errorMessage + item.Description + "\n";
+                }
+
+                throw new Exception(errorMessage);
             }
-
-            throw new Exception(errorMessage);
+            //List<SportDto> sports = _db.Sports.Select(s => new SportDto()
+            //{
+            //    SportId = s.SportId,
+            //    SportName = (s.SportTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
+            //}).ToList();
+            //return new RegisterResponseDto()
+            //{
+            //    Sports = sports,
+            //};
+            return true;
         }
-
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
-    public async Task<bool> ConfirmUserEmail(string userId, string token)
+    public async Task<bool> ResendEmailConfirmationCode(UserLoginRequest dto)
     {
-        var user = await userManager.FindByIdAsync(userId) ?? throw new Exception("User does not exist");
-
-        // Confirm the email using the token
-        var result = await userManager.ConfirmEmailAsync(user, token);
-        if (!result.Succeeded) throw new Exception("Invalid confirmation token");
-        return true;
+        try
+        {
+            var user = await userManager.FindByEmailAsync(dto.Email);
+            if (user == null) throw new Exception("User does not exist");
+            string code = await SendActivationCode(dto.Email);
+            if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
+            user.EmailConfirmationCode = code;
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<ConfirmUserEmailRespDto> ConfirmUserEmail(ConfirmEmailDto dto, short currentLanguageId)
+    {
+        try
+        {
+            var user = await userManager.FindByEmailAsync(dto.Email) ??
+            throw new Exception("User does not exist");
+            bool isCorrect = await userManager.CheckPasswordAsync(user, dto.Password);
+            if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
+            if (user.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
+            user.EmailConfirmed = true;
+            await _db.SaveChangesAsync();
+            var jwtToken = await GenerateJwtToken(user, GeneralConfig?.EnableTwoFactor ?? false);
+            List<SportDto> sports = _db.Sports.Select(s => new SportDto()
+            {
+                SportId = s.SportId,
+                SportName = (s.SportTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
+            }).ToList();
+            //return await LoginAsync(new UserLoginRequest()
+            //{
+            //    Email = dto.Email,
+            //    Password = dto.Password
+            //}, currentLanguageId);
+            return new ConfirmUserEmailRespDto()
+            {
+                AuthResult = jwtToken,
+                Sports = sports
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
     public async Task<LoginResponseDto> LoginAsync(UserLoginRequest user, short currentLanguageId)
     {
@@ -144,17 +187,83 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
     }
-    public async Task<UserProfileDto> CompleteRegistration(CompleteRegistrationDto dto, long uId, short currentLanguageId)
+    public async Task<LoginResponseDto> GoogleLoginAsync(UserGoogleLoginDto dto, short currentLanguageId)
     {
-        XsportUser? user = await _db.XsportUsers.Where(u => u.Id == uId).FirstOrDefaultAsync() ??
-        throw new Exception(UserServiceErrors.user_does_not_exist);
-
-        string img = string.Empty;
-        if (dto.File != null) img = await Utils.UploadImageFileAsync(dto.File, user.Id, webHostEnvironment);
-        user.ImagePath = img;
-        await _db.SaveChangesAsync();
-        await AddFavoriteSportsToUser(uId, dto.SportsIds);
-        return await GetUserProfile(uId, currentLanguageId);
+        string Uid;
+        try
+        {
+            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(dto.FirebaseToken);
+            Uid = decodedToken.Uid;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+        try
+        {
+            var existingUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Uid == Uid);
+            if (existingUser == null)
+            {
+                XsportUser xsportUser = new XsportUser()
+                {
+                    Uid = Uid,
+                    Email = dto.Email,
+                    EmailConfirmed = true,
+                    UserName = dto.Email,
+                    XsportName = dto.Name,
+                    PhoneNumber = dto.Phone,
+                    LoyaltyPoints = 0,
+                    Gender = dto.Gender,
+                    Latitude = dto.Latitude,
+                    Longitude = dto.Longitude,
+                    ImagePath = ""
+                };
+                var isCreated = await userManager.CreateAsync(xsportUser);
+                if (!isCreated.Succeeded) throw new Exception("User could not be created successfully.");
+                var jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
+                return new LoginResponseDto
+                {
+                    AuthResult = jwtToken,
+                    UserProfile = null
+                };
+            }
+            else
+            {
+                var jwtToken = await GenerateJwtToken(existingUser, GeneralConfig?.EnableTwoFactor ?? false);
+                var userProfile = await GetUserProfile(existingUser.Id, currentLanguageId);
+                return new LoginResponseDto
+                {
+                    AuthResult = jwtToken,
+                    UserProfile = userProfile
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<UserProfileDto> CompleteRegistration(long uId, CompleteRegistrationDto dto, short currentLanguageId)
+    {
+        try
+        {
+            XsportUser? user = await _db.XsportUsers.Where(u => u.Id == uId)
+                .Include(u => u.UserSports)
+                .FirstOrDefaultAsync() ??
+                throw new Exception(UserServiceErrors.user_does_not_exist);
+            //var isCorrect = await userManager.CheckPasswordAsync(user, dto.Password);
+            //if (!isCorrect) throw new Exception("Incorrect password.");
+            string img = string.Empty;
+            if (dto.File != null) img = await Utils.UploadImageFileAsync(dto.File, user.Id, webHostEnvironment);
+            user.ImagePath = img;
+            await _db.SaveChangesAsync();
+            await AddFavoriteSportsToUser(user, dto.SportsIds);
+            return await GetUserProfile(uId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
     public async Task<UserProfileDto> GetUserProfile(long uId, short currentLanguageId)
     {
@@ -163,18 +272,26 @@ public class UserServices : IUserServices
         {
             user = await _db.XsportUsers.Where(u => u.Id == uId)
             .Include(u => u.UserSports)
+            .ThenInclude(userSport => userSport.UserSportPreferenceValues)
+            .Include(u => u.UserSports)
+            .ThenInclude(userSport => userSport.Sport)
+            .ThenInclude(sport => sport.SportTranslations)
+            .Include(u => u.UserSports)
             .ThenInclude(userSport => userSport.Sport)
             .ThenInclude(sport => sport.Levels)
             .ThenInclude(level => level.LevelTranslations)
             .Include(u => u.UserSports)
-            .ThenInclude(userSport => userSport.UserSportPreferences)
-            .ThenInclude(userSportPreference => userSportPreference.SportPreference)
-            .ThenInclude(sportPreference => sportPreference.SportPreferenceTranslations)
+            .ThenInclude(userSport => userSport.Sport)
+            .ThenInclude(sport => sport.SportPreferences)
+            .ThenInclude(sportPrefence => sportPrefence.SportPreferenceTranslations)
             .Include(u => u.UserSports)
-            .ThenInclude(userSport => userSport.UserSportPreferences)
-            .ThenInclude(userSportPreference => userSportPreference.SportPreferenceValue)
+            .ThenInclude(userSport => userSport.Sport)
+            .ThenInclude(sport => sport.SportPreferences)
+            .ThenInclude(prefernce => prefernce.SportPreferenceValues)
+            .ThenInclude(sportPreferenceValue => sportPreferenceValue.SportPreferenceValueTranslations)
             .Include(u => u.UserMatchs)
-            .AsNoTracking()
+            .ThenInclude(userMatch => userMatch.Match)
+            //.AsNoTracking()
             .FirstOrDefaultAsync();
         }
         catch (Exception ex)
@@ -182,51 +299,226 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
         if (user == null) throw new Exception(UserServiceErrors.user_does_not_exist);
-        UserSport? userSport = user.UserSports?.Where(userSport => userSport.IsCurrentState)?.FirstOrDefault();
+        if (!user.EmailConfirmed) throw new Exception("Please, confirm your account.");
+        if (user.UserSports == null || user.UserSports.Count == 0) throw new Exception("Please, Add at least one Favorite Sport!");
+        UserSport? userSport = user.UserSports.Where(userSport => userSport.IsCurrentState)?.FirstOrDefault();
+        if (userSport == null)
+        {
+            userSport = user.UserSports?.OrderBy(userSport => userSport.UserSportId).FirstOrDefault();
+            userSport!.IsCurrentState = true;
+            await _db.SaveChangesAsync();
+        }
         Sport? currentSport = userSport?.Sport;
         int sportUserPoints = userSport?.Points ?? 0;
         var sportLevels = currentSport?.Levels;
         (string, int) levelInfo = CalculateUserLevel(sportLevels?.ToList() ?? new List<Level>(), sportUserPoints, currentLanguageId);
-        List<CurrentSportPreference>? _currentSportPreferences = userSport?.UserSportPreferences?.Select(userSportPreference => new CurrentSportPreference()
-        {
-            SportPreferenceId = userSportPreference.SportPreferenceId,
-            SportPreferenceName = userSportPreference.SportPreference.SportPreferenceTranslations
-            .Where(t => t.LanguageId == currentLanguageId).FirstOrDefault()?.Name ?? string.Empty,
-            SportPreferenceValueId = userSportPreference.SportPreferenceValueId,
-            SportPreferenceValue = userSportPreference.SportPreferenceValue?.Name ?? string.Empty
-        })?.ToList();
-        List<CurrentSportPreference>? currentSportPreferences = 
         string domainName = httpContextAccessor.HttpContext?.Request.Scheme + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
         return new UserProfileDto()
         {
-            User = new UserInfo()
+            User = new UserInfoDto()
             {
                 UserId = user.Id,
-                Name = user.UserName,
+                Name = user.XsportName,
                 Email = user.Email,
                 Phone = user.PhoneNumber,
+                Gender = user.Gender,
                 LoyaltyPoints = user.LoyaltyPoints,
                 Longitude = user.Longitude,
                 Latitude = user.Latitude,
                 ImgURL = string.IsNullOrEmpty(user.ImagePath) ? "" : domainName + "/Images/" + user.ImagePath
             },
-            FavoriteSports = user.UserSports?.Select(userSport => new FavoriteSport()
+            FavoriteSports = user.UserSports?.Select(userSport => new FavoriteSportDto()
             {
                 Id = userSport.SportId,
-                Name = userSport.Sport?.Name ?? string.Empty,
-                IsCurrentState = userSport.IsCurrentState
+                Name = userSport.Sport?.SportTranslations?.First(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
+                IsCurrentState = userSport.IsCurrentState,
+                Preferences = userSport.Sport!.SportPreferences.Select(preference => new SportPreferenceDto()
+                {
+                    SportPreferenceId = preference.SportPreferenceId,
+                    SportPreferenceName = preference.SportPreferenceTranslations
+                    .First(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
+                    SportPreferenceValues = preference.SportPreferenceValues.Select(value => new SportPreferenceValueDto()
+                    {
+                        SportPreferenceValueId = value.SportPreferenceValueId,
+                        SportPreferenceValueName = value.SportPreferenceValueTranslations?
+                        .First(t => t.LanguageId == currentLanguageId)?
+                        .Name ?? string.Empty
+                    }).ToList(),
+                    SelectedPreferenceValueId = userSport.UserSportPreferenceValues
+                    .First(v => preference.SportPreferenceValues
+                    .Select(v => v.SportPreferenceValueId).Contains(v.SportPreferenceValueId))
+                    .SportPreferenceValueId
+                }).ToList()
             }).ToList(),
-            CurrentSport = new CurrentSport()
+            CurrentSport = new CurrentSportDto()
             {
-                CurrentSportId = currentSport?.SportId ?? user.UserSports?.FirstOrDefault()?.SportId ?? 0,
-                NumOfMatchs = user.UserMatchs?.Count ?? 0,
+                CurrentSportId = currentSport!.SportId,
+                NumOfMatchs = user.UserMatchs?
+                .Where(userMatch => userMatch.Match.SportId == userSport!.SportId)?
+                .ToList().Count ?? 0,
                 Points = sportUserPoints,
                 UserLevel = levelInfo.Item1,
                 LevelPercent = levelInfo.Item2,
-                Preferences = currentSportPreferences
-            }
+                Levels = sportLevels?.Select(sl => new SportLevel()
+                {
+                    LevelName = sl.LevelTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
+                    LevelMaxPoints = sl.MaxPoints
+                }).ToList() ?? new List<SportLevel>()
+            },
+            Followers = 0,
+            Following = 0
         };
 
+    }
+    public async Task<UserProfileDto> EditUserProfile(long uId, EditUserReqDto dto, short currentLanguageId)
+    {
+        try
+        {
+            XsportUser user = await _db.XsportUsers.Include(u => u.UserSports)
+                .SingleOrDefaultAsync(u => u.Id == uId) ??
+                throw new Exception("User does not exist");
+            List<long> existingSportsIds = user.UserSports.Select(us => us.SportId).ToList();
+            List<long> toBeDeletedSportsIds = existingSportsIds.Except(dto.SportsIds).ToList();
+            List<long> toBeAddedSportsIds = dto.SportsIds.Except(existingSportsIds).ToList();
+            if (toBeDeletedSportsIds.Count != 0) await DeleteFavoriteSportsToUser(uId, toBeDeletedSportsIds, false);
+            if (toBeAddedSportsIds.Count != 0) await AddFavoriteSportsToUser(user, toBeAddedSportsIds);
+            //TODO delete old file.
+            string img = user.ImagePath ?? string.Empty;
+            if (dto.File != null) img = await Utils.UploadImageFileAsync(dto.File, user.Id, webHostEnvironment);
+            user.XsportName = dto.Name;
+            user.PhoneNumber = dto.Phone;
+            user.Latitude = dto.Latitude;
+            user.Longitude = dto.Longitude;
+            user.Gender = dto.Gender;
+            user.ImagePath = img;
+            await _db.SaveChangesAsync();
+            return await GetUserProfile(uId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<bool> DeleteAccount(long uId)
+    {
+        try
+        {
+            XsportUser user = _db.XsportUsers
+                .Include(u => u.UserSports)
+                .ThenInclude(us => us.UserSportPreferenceValues)
+                .SingleOrDefault(u => u.Id == uId) ??
+                throw new Exception("User does not exist");
+            List<long> SportsIds = user.UserSports.Select(us => us.SportId).ToList();
+            await DeleteFavoriteSportsToUser(uId, SportsIds, true);
+            _db.XsportUsers.Remove(user);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<UserProfileDto> AddFavoriteSports(AddFavoriteSportReqDto dto, long userId, short currentLangId)
+    {
+        try
+        {
+            var user = await _db.XsportUsers
+                .Include(u => u.UserSports)
+                .SingleOrDefaultAsync(u => u.Id == userId) ??
+                throw new Exception("User does not exist");
+            await AddFavoriteSportsToUser(user, dto.SportsIds);
+            return await GetUserProfile(userId, currentLangId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+
+    }
+    public async Task<UserProfileDto> DeleteFavoriteSports(AddFavoriteSportReqDto dto, long userId, short currentLangId)
+    {
+        try
+        {
+            await DeleteFavoriteSportsToUser(userId, dto.SportsIds, false);
+            return await GetUserProfile(userId, currentLangId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+
+    }
+    public async Task<UserProfileDto> EditPreferences(EditPreferencesReqDto dto, long userId, short currentLanguageId)
+    {
+        try
+        {
+            var user = await _db.XsportUsers
+                .Include(u => u.UserSports)
+                .ThenInclude(userSport => userSport.UserSportPreferenceValues)
+                .SingleOrDefaultAsync(u => u.Id == userId);
+            if (user == null) throw new Exception("User does not exist.");
+            if (user.UserSports == null) throw new Exception("Please, choose a favorite sport.");
+            if (user.UserSports.Count == 0) throw new Exception("Please, choose a favorite sport.");
+            var userSport = user.UserSports.SingleOrDefault(userSport => userSport.IsCurrentState);
+            if (userSport == null) throw new Exception("Please, select a sport");
+            var preference = await _db.SportPreferences
+                .Include(sp => sp.SportPreferenceValues)
+                .SingleOrDefaultAsync(p => p.SportPreferenceId == dto.PreferenceId);
+            if (preference == null) throw new Exception("Preference does not exist.");
+            var preferenceVlauesIds = preference.SportPreferenceValues.Select(v => v.SportPreferenceValueId).ToList();
+            var old_US_PV = userSport.UserSportPreferenceValues.SingleOrDefault(v => preferenceVlauesIds.Contains(v.SportPreferenceValueId));
+            if (old_US_PV == null) throw new Exception("Wrong while editing preference!");
+            _db.UserSportPreferenceValues.Remove(old_US_PV);
+            var value = _db.SportPreferenceValues.SingleOrDefault(v => v.SportPreferenceValueId == dto.ValueId);
+            userSport.UserSportPreferenceValues.Add(new UserSportPreferenceValue()
+            {
+                UserSportId = userSport.UserSportId,
+                SportPreferenceValueId = dto.ValueId,
+                UserSport = userSport,
+                SportPreferenceValue = value
+            });
+            await _db.SaveChangesAsync();
+            return await GetUserProfile(userId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<UserProfileDto> SelectCurrentSport(long uId, long sportId, short currentLanguageId)
+    {
+        try
+        {
+            var user = _db.XsportUsers.Where(u => u.Id == uId)
+                .Include(u => u.UserSports)
+                .FirstOrDefault() ??
+                throw new Exception("User Does not exist");
+            if (user.UserSports == null)
+                throw new Exception("User does not have favorite sports");
+            if (user.UserSports.Count == 0)
+                throw new Exception("User does not have favorite sports");
+            if (user.UserSports.FirstOrDefault(us => us.SportId == sportId) == null)
+                throw new Exception("The sport is not a favorite for the user.");
+            foreach (var us in user.UserSports)
+            {
+                if (us.SportId == sportId)
+                {
+                    us.IsCurrentState = true;
+                }
+                else
+                {
+                    us.IsCurrentState = false;
+                }
+            }
+            await _db.SaveChangesAsync();
+            return await GetUserProfile(uId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
     private (string, int) CalculateUserLevel(List<Level> levels, int userPoints, short currentLanguageId)
     {
@@ -239,23 +531,77 @@ public class UserServices : IUserServices
         return (string.Empty, 0);
     }
 
-    private async Task AddFavoriteSportsToUser(long uId, List<long> sportsIds)
+    private async Task AddFavoriteSportsToUser(XsportUser user, List<long> sportsIds)
     {
-        var user = await _db.XsportUsers.Include(u => u.UserSports).SingleAsync(u => u.Id == uId);
-        var sports = await _db.Sports.Where(s => sportsIds.Contains(s.SportId)).ToListAsync();
-        foreach (var sport in sports)
+        try
         {
-            user.UserSports.Add(new UserSport()
+            var sports = await _db.Sports.Where(s => sportsIds.Contains(s.SportId))
+            .Include(s => s.SportPreferences)
+            .ThenInclude(p => p.SportPreferenceValues)
+            .ToListAsync();
+            if (sports == null)
+                throw new Exception("Sports do not exist.");
+            if (sports.Count == 0 || sports.Count != sportsIds.Count)
+                throw new Exception("Sports do not exist.");
+            var favoriteSportsIds = user.UserSports.Select(us => us.SportId).ToList();
+            var favoriteSportsIdsSet = new HashSet<long>(favoriteSportsIds);
+            var sportsIdsSet = new HashSet<long>(sportsIds);
+            if (favoriteSportsIdsSet.Overlaps(sportsIdsSet))
+                throw new Exception("user already has those sports as favorites!");
+            foreach (var sport in sports)
             {
-                XsportUser = user,
-                Sport = sport,
-                IsCurrentState = false,
-                Points = 0,
-            });
+                var notAssignedValuesIds = sport.SportPreferences.Select(p => p.SportPreferenceValues.SingleOrDefault(v => v.IsNotAssigned ?? false)?.SportPreferenceValueId).ToList();
+                var newUserSport = new UserSport()
+                {
+                    XsportUser = user,
+                    Sport = sport,
+                    IsCurrentState = false,
+                    Points = 0,
+                    UserSportPreferenceValues = notAssignedValuesIds.Select(id => new UserSportPreferenceValue()
+                    {
+                        SportPreferenceValueId = id ?? 0
+                    }).ToList()
+                };
+                user.UserSports.Add(newUserSport);
+            }
+            await _db.SaveChangesAsync();
         }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
 
-        // Save changes
-        await _db.SaveChangesAsync();
+    private async Task DeleteFavoriteSportsToUser(long uId, List<long> sportsIds, bool deleteAccount)
+    {
+        try
+        {
+            var user = await _db.XsportUsers
+                .Include(u => u.UserSports)
+                .ThenInclude(us => us.UserSportPreferenceValues)
+                .SingleAsync(u => u.Id == uId);
+            if (user == null) throw new Exception("User does not exist.");
+            if ((sportsIds.Count >= user.UserSports.Count) && !deleteAccount)
+                throw new Exception("Sorry, but You have to keep at least one favorite sport!");
+            var userSports = user.UserSports.Where(us => sportsIds.Contains(us.SportId)).ToList();
+            foreach (var userSport in userSports)
+            {
+                //TODO
+                foreach (var us_pv in userSport.UserSportPreferenceValues)
+                {
+                    _db.UserSportPreferenceValues.Remove(us_pv);
+                }
+                user.UserSports.Remove(userSport);
+
+            }
+
+            // Save changes
+            await _db.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
     }
 
     private async Task<AuthResult> GenerateJwtToken(XsportUser user, bool enableTwoFactor)
@@ -311,18 +657,28 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
     }
-    private async Task SendActivationLink(XsportUser user)
+    private async Task<string> SendActivationCode(string userEmail)
     {
         try
         {
-            //var existingUser = await UserManager.FindByIdAsync(userId.ToString());
-            if (user == null) throw new Exception("Invalid user");
-            var request = httpContextAccessor.HttpContext?.Request ?? throw new Exception("Domain could not be retrieved");
-            var domain = $"{request.Scheme}://{request.Host}{request.PathBase}";
-            var emailConfirmationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            string activationLink = $"{domain}/api/User/ConfirmUserEmail?userId={user.Id}&token={System.Web.HttpUtility.UrlEncode(emailConfirmationToken)}";
-            var message = new Message(new List<string>() { user.Email ?? string.Empty }, "Account Confirmation", activationLink, null);
+            string code = GenerateEmailConfirmationCode();
+            var message = new Message(new List<string>() { userEmail ?? string.Empty }, "Account Confirmation", code, null);
             await emailService.SendEmailAsync(message);
+            return code;
+        }
+        catch (Exception)
+        {
+            throw new Exception("Confirmation email could not be sent. Please, make sure you entered a valide email address");
+        }
+    }
+    private string GenerateEmailConfirmationCode()
+    {
+        try
+        {
+            Random random = new Random();
+            int randomNumber = random.Next(100000, 999999);
+            string code = randomNumber.ToString("D6");
+            return code;
         }
         catch (Exception ex)
         {
