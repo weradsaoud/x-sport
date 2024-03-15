@@ -10,7 +10,7 @@ namespace Xsport.DB.Entities
     public class LevelTranslation
     {
         public long LevelTranslationId { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; } = null!;
         [Required]
         public long LevelId { get; set; }
         [Required]

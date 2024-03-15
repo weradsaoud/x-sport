@@ -18,4 +18,5 @@ public interface IUserServices
     public Task<bool> ResendEmailConfirmationCode(UserLoginRequest dto);
     public Task<UserProfileDto> SelectCurrentSport(long uId, long sportId, short currentLanguageId);
     public Task<bool> DeleteAccount(long uId);
+    public Task<List<PlayersRankingListDto>> GetPlayers(long uId, GetPlayersReqDto dto, short currentLanguageId);
 }
