@@ -18,4 +18,5 @@ public class Sport
     public ICollection<Match>? Matches { get; set; }
     public ICollection<SportPreference> SportPreferences { get; set; } = null!;
     public ICollection<Level> Levels { get; set; } = null!;
+    public ICollection<Course> Courses { get; set; } = null!;
 }

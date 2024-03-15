@@ -24,7 +24,7 @@ using Xsport.Core.SportServices;
 using Xsport.Core.CommonServices;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("AWSConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);

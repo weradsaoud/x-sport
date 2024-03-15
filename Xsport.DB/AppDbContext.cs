@@ -29,4 +29,14 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<UserSport> UserSports { get; set; }
     public DbSet<Match> Matchs { get; set; }
     public DbSet<UserMatch> UserMatchs { get; set; }
+    public DbSet<Academy> Academies { get; set; }
+    public DbSet<AcademyTranslation> AcademyTranslations { get; set; }
+    public DbSet<Course> Courses { get; set; }
+    public DbSet<AgeCategory> AgeCategories { get; set; }
+    public DbSet<AgeCategoryTranslation> AgeCategoryTranslations { get; set; }
+    public DbSet<UserCourse> UserCourses { get; set; }
+    public DbSet<WorkingDay> WorkingDays { get; set; }
+    public DbSet<WorkingDayTranslation> WorkingDayTranslations { get; set; }
+    public DbSet<AcademyWorkingDay> AcademyWorkingDays { get; set; }
+    public DbSet<CourseWorkingDay> CourseWorkingDays { get; set; }
 }

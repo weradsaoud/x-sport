@@ -10,4 +10,7 @@ public class Language
     public ICollection<SportPreferenceTranslation>? SportPreferenceTranslations { get; set; }
     public ICollection<SportPreferenceValueTranslation>? SportPreferenceValueTranslations { get; set; }
     public ICollection<LevelTranslation> LevelTranslations { get; set; } = null!;
+    public ICollection<AcademyTranslation> AcademyTranslations { get; set; } = null!;
+    public ICollection<AgeCategoryTranslation> AgeCategoryTranslations { get; set; } = null!;
+    public ICollection<WorkingDayTranslation> WorkingDayTranslations { get; set; } = null!;
 }
