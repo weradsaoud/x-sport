@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Security.Claims;
 using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -177,7 +178,7 @@ public class UserController : BaseController
             if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
             return await _userServices.DeleteAccount(LoggedInUser.Id);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             throw new ApiException(ex.Message, 500);
         }
@@ -268,6 +269,27 @@ public class UserController : BaseController
         else
         {
             throw new ApiException("Invalide inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<List<PlayersRankingListDto>> GetPlayers([FromQuery] GetPlayersReqDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in.");
+                return await _userServices.GetPlayers(LoggedInUser.Id, dto, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide inputs.");
         }
     }
 }

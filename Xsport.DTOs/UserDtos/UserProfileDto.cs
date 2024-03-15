@@ -4,7 +4,6 @@ namespace Xsport.DTOs.UserDtos
     {
         public UserInfoDto? User { get; set; }
         public List<FavoriteSportDto>? FavoriteSports { get; set; }
-        public CurrentSportDto CurrentSport { get; set; } = null!;
         public int Followers { get; set; }
         public int Following { get; set; }
     }
@@ -26,17 +25,13 @@ namespace Xsport.DTOs.UserDtos
         public long Id { get; set; }
         public string Name { get; set; } = null!;
         public bool IsCurrentState { get; set; }
-        public List<SportPreferenceDto>? Preferences { get; set; }
-
-    }
-    public class CurrentSportDto
-    {
-        public long CurrentSportId { get; set; }
         public int Points { get; set; }
         public int LevelPercent { get; set; }
-        public string UserLevel{ get; set; }=null!;
+        public string UserLevel { get; set; } = null!;
         public int NumOfMatchs { get; set; }
         public List<SportLevel> Levels { get; set; } = null!;
+        public List<SportPreferenceDto>? Preferences { get; set; }
+
     }
     public class SportLevel
     {

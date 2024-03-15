@@ -21,6 +21,10 @@ using Microsoft.AspNetCore.Authentication;
 using FirebaseAdmin.Auth;
 using Newtonsoft.Json.Linq;
 using MimeKit.Encodings;
+using Xsport.DB;
+using Xsport.Common.Constants;
+using Xsport.DB.QueryObjects;
+using Xsport.Common.Enums;
 
 namespace Xsport.Core;
 public class UserServices : IUserServices
@@ -32,7 +36,16 @@ public class UserServices : IUserServices
     private JwtConfig JwtConfig { get; }
     GeneralConfig GeneralConfig { get; }
     private IEmailService emailService { get; }
-    public UserServices(AppDbContext db, IWebHostEnvironment _webHostEnvironment, IHttpContextAccessor _httpContextAccessor, UserManager<XsportUser> _userManager, IOptionsMonitor<JwtConfig> _optionsMonitor, IOptionsMonitor<GeneralConfig> _optionsMonitor2, IEmailService _emailService)
+    public IRepositoryManager _repositoryManager { get; set; }
+    public UserServices(
+        AppDbContext db,
+        IWebHostEnvironment _webHostEnvironment,
+        IHttpContextAccessor _httpContextAccessor,
+        UserManager<XsportUser> _userManager,
+        IOptionsMonitor<JwtConfig> _optionsMonitor,
+        IOptionsMonitor<GeneralConfig> _optionsMonitor2,
+        IEmailService _emailService,
+        IRepositoryManager repositoryManager)
     {
         _db = db;
         webHostEnvironment = _webHostEnvironment;
@@ -41,6 +54,7 @@ public class UserServices : IUserServices
         JwtConfig = _optionsMonitor.CurrentValue;
         GeneralConfig = _optionsMonitor2.CurrentValue;
         emailService = _emailService;
+        _repositoryManager = repositoryManager;
     }
 
     public async Task<bool> Register(UserRegistrationDto user, short currentLanguageId)
@@ -327,44 +341,44 @@ public class UserServices : IUserServices
                 Latitude = user.Latitude,
                 ImgURL = string.IsNullOrEmpty(user.ImagePath) ? "" : domainName + "/Images/" + user.ImagePath
             },
-            FavoriteSports = user.UserSports?.Select(userSport => new FavoriteSportDto()
+            FavoriteSports = user.UserSports?.Select(userSport =>
             {
-                Id = userSport.SportId,
-                Name = userSport.Sport?.SportTranslations?.First(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
-                IsCurrentState = userSport.IsCurrentState,
-                Preferences = userSport.Sport!.SportPreferences.Select(preference => new SportPreferenceDto()
+                (string, int) levelInfo = CalculateUserLevel(userSport.Sport?.Levels.ToList() ?? new List<Level>(), sportUserPoints, currentLanguageId);
+                return new FavoriteSportDto()
                 {
-                    SportPreferenceId = preference.SportPreferenceId,
-                    SportPreferenceName = preference.SportPreferenceTranslations
-                    .First(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
-                    SportPreferenceValues = preference.SportPreferenceValues.Select(value => new SportPreferenceValueDto()
+                    Id = userSport.SportId,
+                    Name = userSport.Sport?.SportTranslations?.First(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
+                    IsCurrentState = userSport.IsCurrentState,
+                    Points = userSport.Points,
+                    NumOfMatchs = user.UserMatchs?
+                    .Where(userMatch => userMatch.Match.SportId == userSport!.SportId)?
+                    .ToList().Count ?? 0,
+                    UserLevel = levelInfo.Item1,
+                    LevelPercent = levelInfo.Item2,
+                    Levels = userSport.Sport?.Levels.Select(sl => new SportLevel()
                     {
-                        SportPreferenceValueId = value.SportPreferenceValueId,
-                        SportPreferenceValueName = value.SportPreferenceValueTranslations?
-                        .First(t => t.LanguageId == currentLanguageId)?
-                        .Name ?? string.Empty
+                        LevelName = sl.LevelTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
+                        LevelMaxPoints = sl.MaxPoints
+                    }).ToList() ?? new List<SportLevel>(),
+                    Preferences = userSport.Sport!.SportPreferences.Select(preference => new SportPreferenceDto()
+                    {
+                        SportPreferenceId = preference.SportPreferenceId,
+                        SportPreferenceName = preference.SportPreferenceTranslations
+                        .First(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
+                        SportPreferenceValues = preference.SportPreferenceValues.Select(value => new SportPreferenceValueDto()
+                        {
+                            SportPreferenceValueId = value.SportPreferenceValueId,
+                            SportPreferenceValueName = value.SportPreferenceValueTranslations?
+                            .First(t => t.LanguageId == currentLanguageId)?
+                            .Name ?? string.Empty
+                        }).ToList(),
+                        SelectedPreferenceValueId = userSport.UserSportPreferenceValues
+                        .First(v => preference.SportPreferenceValues
+                        .Select(v => v.SportPreferenceValueId).Contains(v.SportPreferenceValueId))
+                        .SportPreferenceValueId
                     }).ToList(),
-                    SelectedPreferenceValueId = userSport.UserSportPreferenceValues
-                    .First(v => preference.SportPreferenceValues
-                    .Select(v => v.SportPreferenceValueId).Contains(v.SportPreferenceValueId))
-                    .SportPreferenceValueId
-                }).ToList()
+                };
             }).ToList(),
-            CurrentSport = new CurrentSportDto()
-            {
-                CurrentSportId = currentSport!.SportId,
-                NumOfMatchs = user.UserMatchs?
-                .Where(userMatch => userMatch.Match.SportId == userSport!.SportId)?
-                .ToList().Count ?? 0,
-                Points = sportUserPoints,
-                UserLevel = levelInfo.Item1,
-                LevelPercent = levelInfo.Item2,
-                Levels = sportLevels?.Select(sl => new SportLevel()
-                {
-                    LevelName = sl.LevelTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId)?.Name ?? string.Empty,
-                    LevelMaxPoints = sl.MaxPoints
-                }).ToList() ?? new List<SportLevel>()
-            },
             Followers = 0,
             Following = 0
         };
@@ -377,10 +391,12 @@ public class UserServices : IUserServices
             XsportUser user = await _db.XsportUsers.Include(u => u.UserSports)
                 .SingleOrDefaultAsync(u => u.Id == uId) ??
                 throw new Exception("User does not exist");
+            if(dto.SportsIds == null) throw new Exception("Please, choose at least one sport.");
+            if (dto.SportsIds?.Count == 0) throw new Exception("Please, choose at least one sport.");
             List<long> existingSportsIds = user.UserSports.Select(us => us.SportId).ToList();
             List<long> toBeDeletedSportsIds = existingSportsIds.Except(dto.SportsIds).ToList();
             List<long> toBeAddedSportsIds = dto.SportsIds.Except(existingSportsIds).ToList();
-            if (toBeDeletedSportsIds.Count != 0) await DeleteFavoriteSportsToUser(uId, toBeDeletedSportsIds, false);
+            if (toBeDeletedSportsIds.Count != 0) await DeleteFavoriteSportsToUser(uId, toBeDeletedSportsIds, true);
             if (toBeAddedSportsIds.Count != 0) await AddFavoriteSportsToUser(user, toBeAddedSportsIds);
             //TODO delete old file.
             string img = user.ImagePath ?? string.Empty;
@@ -520,6 +536,36 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
     }
+    public async Task<List<PlayersRankingListDto>> GetPlayers(long uId, GetPlayersReqDto dto, short currentLanguageId)
+    {
+        try
+        {
+            var user = await _repositoryManager.UserRepository.FindByConditionWithEagerLoad(false,
+                u => u.Id == uId,
+                u => u.UserSports).FirstAsync();
+            if (user == null) throw new Exception("User does not exist.");
+            if (user.UserSports == null) throw new Exception("You Must have at least one favorite sport.");
+            if (user.UserSports.Count == 0) throw new Exception("You Must have at least one favorite sport.");
+            var currentSport = user.UserSports.Where(us => us.IsCurrentState).FirstOrDefault();
+            if (currentSport == null) throw new Exception("Please, Select a sport.");
+            var sportId = currentSport.SportId;
+            var players = await _repositoryManager.UserRepository.GetPlayersRankingList(
+                sportId,
+                currentLanguageId,
+                PlayersRankingListOrderOptions.ByPointsDes,
+                PlayersRankingListFilterOptions.ByPlayerName,
+                dto.Name ?? string.Empty,
+                dto.PageInfo.PageNumber,
+                dto.PageInfo.PageSize);
+            return players.Where(p => Utils.CalculateDistanceBetweenTowUsers(
+                user.Latitude ?? 0, user.Longitude ?? 0, p.Lat, p.Long)
+            <= XsportConstants.SameAreaRaduis).ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
     private (string, int) CalculateUserLevel(List<Level> levels, int userPoints, short currentLanguageId)
     {
         if (levels == null || levels.Count == 0) return (string.Empty, 0);
@@ -572,7 +618,7 @@ public class UserServices : IUserServices
         }
     }
 
-    private async Task DeleteFavoriteSportsToUser(long uId, List<long> sportsIds, bool deleteAccount)
+    private async Task DeleteFavoriteSportsToUser(long uId, List<long> sportsIds, bool deleteOrEditAccount)
     {
         try
         {
@@ -581,7 +627,7 @@ public class UserServices : IUserServices
                 .ThenInclude(us => us.UserSportPreferenceValues)
                 .SingleAsync(u => u.Id == uId);
             if (user == null) throw new Exception("User does not exist.");
-            if ((sportsIds.Count >= user.UserSports.Count) && !deleteAccount)
+            if ((sportsIds.Count >= user.UserSports.Count) && !deleteOrEditAccount)
                 throw new Exception("Sorry, but You have to keep at least one favorite sport!");
             var userSports = user.UserSports.Where(us => sportsIds.Contains(us.SportId)).ToList();
             foreach (var userSport in userSports)
