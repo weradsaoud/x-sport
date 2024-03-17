@@ -12,9 +12,7 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     }
     public DbSet<XsportUser> XsportUsers { get; set; }
     public DbSet<XsportRole> XsportRoles { get; set; }
-
     public DbSet<Sport> Sports { get; set; }
-    //public DbSet<UserType> UserTypes { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Language> Languages { get; set; }
     public DbSet<SportTranslation> SportTranslations { get; set; }
@@ -32,6 +30,7 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<Academy> Academies { get; set; }
     public DbSet<AcademyTranslation> AcademyTranslations { get; set; }
     public DbSet<Course> Courses { get; set; }
+    public DbSet<CourseTranslation> CourseTranslations { get; set; }
     public DbSet<AgeCategory> AgeCategories { get; set; }
     public DbSet<AgeCategoryTranslation> AgeCategoryTranslations { get; set; }
     public DbSet<UserCourse> UserCourses { get; set; }
@@ -39,4 +38,13 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<WorkingDayTranslation> WorkingDayTranslations { get; set; }
     public DbSet<AcademyWorkingDay> AcademyWorkingDays { get; set; }
     public DbSet<CourseWorkingDay> CourseWorkingDays { get; set; }
+    public DbSet<Service> Services { get; set; }
+    public DbSet<ServiceTranslation> ServiceTranslations { get; set; }
+    public DbSet<ServiceValue> ServiceValues { get; set; }
+    public DbSet<ServiceValueTranslation> ServiceValueTranslations { get; set; }
+    public DbSet<AcademyServiceValue> AcademyServiceValues { get; set; }
+    public DbSet<Relative> Relatives { get; set; }
+    public DbSet<RelativeTranslation> RelativeTranslations { get; set; }
+    public DbSet<Mutimedia> Mutimedias { get; set; }
+    public DbSet<AcademyReview> AcademyReviews { get; set; }
 }

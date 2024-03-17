@@ -13,4 +13,8 @@ public class Language
     public ICollection<AcademyTranslation> AcademyTranslations { get; set; } = null!;
     public ICollection<AgeCategoryTranslation> AgeCategoryTranslations { get; set; } = null!;
     public ICollection<WorkingDayTranslation> WorkingDayTranslations { get; set; } = null!;
+    public ICollection<RelativeTranslation> RelativeTranslations { get; set; } = null!;
+    public ICollection<ServiceTranslation> ServiceTranslations { get; set; } = null!;
+    public ICollection<ServiceValueTranslation> ServiceValueTranslations { get; set; } = null!;
+    public ICollection<CourseTranslation> CourseTranslations { get; set; } = null!;
 }

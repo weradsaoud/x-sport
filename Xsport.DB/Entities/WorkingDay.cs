@@ -9,7 +9,7 @@ namespace Xsport.DB.Entities
     public class WorkingDay
     {
         public long WorkingDayId { get; set; }
-
+        public int OrderInWeek { get; set; }
         //navigational properties
         public ICollection<WorkingDayTranslation> WorkingDayTranslations { get; set; } = null!;
         public ICollection<AcademyWorkingDay> AcademyWorkingDays { get; set; } = null!;

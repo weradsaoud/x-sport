@@ -7,7 +7,7 @@ using Xsport.Common.Enums;
 using Xsport.DB.Entities;
 using Xsport.DTOs.UserDtos;
 
-namespace Xsport.DB.Repositories
+namespace Xsport.DB.RepositoryInterfaces
 {
     public interface IUserRepository : IRepositoryBase<XsportUser>
     {

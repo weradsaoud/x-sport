@@ -4,7 +4,7 @@ namespace Xsport.DB.Entities;
 public class SportTranslation
 {
     public long SportTranslationId { get; set; }
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
     [Required]
     public long SportId { get; set; }
     [Required]

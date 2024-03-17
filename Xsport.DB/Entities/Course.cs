@@ -9,8 +9,9 @@ namespace Xsport.DB.Entities
     public class Course
     {
         public long CourseId { get; set; }
-        public string Description { get; set; } = null!;
         public decimal Price { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
 
         // foriegn keys
         public long AcademyId { get; set; }
@@ -23,5 +24,6 @@ namespace Xsport.DB.Entities
         public AgeCategory AgeCategory { get; set; } = null!;
         public ICollection<UserCourse> UserCourses { get; set; } = null!;
         public ICollection<CourseWorkingDay> CourseWorkingDays { get; set; } = null!;
+        public ICollection<CourseTranslation> CourseTranslations { get; set; } = null!;
     }
 }

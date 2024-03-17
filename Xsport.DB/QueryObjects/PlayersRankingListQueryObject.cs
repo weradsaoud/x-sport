@@ -35,19 +35,26 @@ namespace Xsport.DB.QueryObjects
                 this IQueryable<PlayersRankingListDto> players,
                 PlayersRankingListOrderOptions orderOption)
         {
-            switch (orderOption)
+            try
             {
-                case PlayersRankingListOrderOptions.None:
-                    return players;
-                case PlayersRankingListOrderOptions.SimpleOrder:
-                    return players.OrderBy(p => p.Id);
-                case PlayersRankingListOrderOptions.ByPointsDes:
-                    return players.OrderByDescending(p => p.Points);
-                case PlayersRankingListOrderOptions.ByPointsAsc:
-                    return players.OrderBy(p => p.Points);
-                default:
-                    throw new ArgumentOutOfRangeException(
-                    nameof(orderOption), orderOption, null);
+                switch (orderOption)
+                {
+                    case PlayersRankingListOrderOptions.None:
+                        return players;
+                    case PlayersRankingListOrderOptions.SimpleOrder:
+                        return players.OrderBy(p => p.Id);
+                    case PlayersRankingListOrderOptions.ByPointsDes:
+                        return players.OrderByDescending(p => p.Points);
+                    case PlayersRankingListOrderOptions.ByPointsAsc:
+                        return players.OrderBy(p => p.Points);
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                        nameof(orderOption), orderOption, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 
@@ -55,32 +62,28 @@ namespace Xsport.DB.QueryObjects
                 this IQueryable<PlayersRankingListDto> players,
                 PlayersRankingListFilterOptions filterOption, string filterValue)
         {
-            if (filterValue == string.Empty) return players;
-            switch (filterOption)
+            try
             {
-                case PlayersRankingListFilterOptions.ByPlayerName:
-                    return players.Where(p => p.Name.Contains(filterValue));
-                case PlayersRankingListFilterOptions.ByPointsUp:
-                    var valueUp = int.Parse(filterValue);
-                    return players.Where(p => p.Points >= valueUp);
-                case PlayersRankingListFilterOptions.ByPointsDown:
-                    var valueDown = int.Parse(filterValue);
-                    return players.Where(p => p.Points <= valueDown);
-                default:
-                    throw new ArgumentOutOfRangeException
-                    (nameof(filterOption), filterOption, null);
+                if (filterValue == string.Empty) return players;
+                switch (filterOption)
+                {
+                    case PlayersRankingListFilterOptions.ByPlayerName:
+                        return players.Where(p => p.Name.Contains(filterValue));
+                    case PlayersRankingListFilterOptions.ByPointsUp:
+                        var valueUp = int.Parse(filterValue);
+                        return players.Where(p => p.Points >= valueUp);
+                    case PlayersRankingListFilterOptions.ByPointsDown:
+                        var valueDown = int.Parse(filterValue);
+                        return players.Where(p => p.Points <= valueDown);
+                    default:
+                        throw new ArgumentOutOfRangeException
+                        (nameof(filterOption), filterOption, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
-
-        //public static IQueryable<PlayersRankingListDto> GetPlayersRankingList(
-        //    this IQueryable<XsportUser> users,
-        //    long sportId,
-        //    short currentLanguageId,
-        //    PlayersRankingListOrderOptions orderOption,
-        //    PlayersRankingListFilterOptions filterOption, string filterValue,
-        //    int pageNumZeroStart, int pageSize)
-        //{
-
-        //}
     }
 }

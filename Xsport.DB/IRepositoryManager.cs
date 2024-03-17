@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xsport.Db;
-using Xsport.DB.Repositories;
+using Xsport.DB.RepositoryInterfaces;
 
 namespace Xsport.DB
 {
@@ -12,5 +12,7 @@ namespace Xsport.DB
     {
         AppDbContext db { get; }
         IUserRepository UserRepository { get; }
+        IAcademyRepository AcademyRepository { get; }
+        ISportRepository SportRepository { get; }
     }
 }

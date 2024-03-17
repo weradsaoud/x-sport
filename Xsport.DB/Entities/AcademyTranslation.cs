@@ -11,6 +11,7 @@ namespace Xsport.DB.Entities
     {
         public long AcademyTranslationId { get; set; }
         public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
         public long AcademyId { get; set; }
         public long LanguageId { get; set; }
 

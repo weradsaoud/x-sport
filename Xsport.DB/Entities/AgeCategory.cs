@@ -12,7 +12,11 @@ namespace Xsport.DB.Entities
         public int FromAge { get; set; }
         public int ToAge { get; set; }
 
+        //foriegn keys
+        public long AcademyId { get; set; }
+
         //navigational properties
+        public Academy Academy { get; set; } = null!;
         public ICollection<AgeCategoryTranslation> AgeCategoryTranslations { get; set; } = null!;
         public ICollection<Course> Courses { get; set; } = null!;
     }

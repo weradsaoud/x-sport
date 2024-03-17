@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Xsport.DB.Repositories
+namespace Xsport.DB.RepositoryInterfaces
 {
     public interface IRepositoryBase<T>
     {

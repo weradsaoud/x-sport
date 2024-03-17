@@ -19,4 +19,5 @@ public class XsportUser: IdentityUser<long>
     public ICollection<UserSport> UserSports { get; set; } = null!;
     public ICollection<UserMatch> UserMatchs { get; set; } = null!;
     public ICollection<UserCourse> UserCourses { get; set; } = null!;
+    public ICollection<AcademyReview> AcademyReviews { get; set; } = null!;
 }
