@@ -15,7 +15,7 @@
   </PropertyGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="../Xsport.Common/Xsport.Common.csproj"/>
+		<ProjectReference Include="../Xsport.Common/Xsport.Common.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -5,6 +5,7 @@ using Xsport.Common.Utils;
 using Xsport.Db;
 using Xsport.DB.Entities;
 using Xsport.DB.QueryObjects;
+using Xsport.DB.RepositoryInterfaces;
 using Xsport.DTOs.UserDtos;
 
 namespace Xsport.DB.Repositories
@@ -20,13 +21,20 @@ namespace Xsport.DB.Repositories
             PlayersRankingListFilterOptions filterOption, string filterValue,
             int pageNumZeroStart, int pageSize)
         {
-            return await _db.XsportUsers
-                .GetPlayersWithSameFavoriteSport(sportId, false)
-                //.GetPlayersWithSameAreaAsUser(userLat, userLong, false) // ERR: Custom method can not be evaluated by EF
-                .MapXsportUsersToPlayersRankingListDto(sportId, currentLanguageId)
-                .OrderPlayersRankingList(orderOption)
-                .FilterPlayersRankingList(filterOption, filterValue)
-                .Page<PlayersRankingListDto>(pageNumZeroStart, pageSize).ToListAsync();
+            try
+            {
+                return await _db.XsportUsers
+                    .GetPlayersWithSameFavoriteSport(sportId, false)
+                    //.GetPlayersWithSameAreaAsUser(userLat, userLong, false) // ERR: Custom method can not be evaluated by EF
+                    .MapXsportUsersToPlayersRankingListDto(sportId, currentLanguageId)
+                    .OrderPlayersRankingList(orderOption)
+                    .FilterPlayersRankingList(filterOption, filterValue)
+                    .Page<PlayersRankingListDto>(pageNumZeroStart, pageSize).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
     }

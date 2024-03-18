@@ -134,6 +134,299 @@ namespace Xsport.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Academy", b =>
+                {
+                    b.Property<long>("AcademyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AcademyId"));
+
+                    b.Property<TimeOnly>("CloseAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<decimal>("Lattitude")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Longitude")
+                        .HasColumnType("numeric");
+
+                    b.Property<TimeOnly>("OpenAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("AcademyId");
+
+                    b.ToTable("Academies");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyReview", b =>
+                {
+                    b.Property<long>("AcademyReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AcademyReviewId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double>("Evaluation")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("ReviewDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("XsportUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AcademyReviewId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.HasIndex("XsportUserId");
+
+                    b.ToTable("AcademyReviews");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyServiceValue", b =>
+                {
+                    b.Property<long>("AcademyServiceValueId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AcademyServiceValueId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ServiceValueId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AcademyServiceValueId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.HasIndex("ServiceValueId");
+
+                    b.ToTable("AcademyServiceValues");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyTranslation", b =>
+                {
+                    b.Property<long>("AcademyTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AcademyTranslationId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("AcademyTranslationId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("AcademyTranslations");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyWorkingDay", b =>
+                {
+                    b.Property<long>("AcademyWorkingDayId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AcademyWorkingDayId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<TimeOnly>("CloseAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("OpenAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<long>("WorkingDayId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("AcademyWorkingDayId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.HasIndex("WorkingDayId");
+
+                    b.ToTable("AcademyWorkingDays");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AgeCategory", b =>
+                {
+                    b.Property<long>("AgeCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AgeCategoryId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("FromAge")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ToAge")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AgeCategoryId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.ToTable("AgeCategories");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AgeCategoryTranslation", b =>
+                {
+                    b.Property<long>("AgeCategoryTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("AgeCategoryTranslationId"));
+
+                    b.Property<long>("AgeCategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("AgeCategoryTranslationId");
+
+                    b.HasIndex("AgeCategoryId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("AgeCategoryTranslations");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Course", b =>
+                {
+                    b.Property<long>("CourseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("CourseId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("AgeCategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<long>("SportId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("CourseId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.HasIndex("AgeCategoryId");
+
+                    b.HasIndex("SportId");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.CourseTranslation", b =>
+                {
+                    b.Property<long>("CourseTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("CourseTranslationId"));
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("CourseTranslationId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.ToTable("CourseTranslations");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.CourseWorkingDay", b =>
+                {
+                    b.Property<long>("CourseWorkingDayId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("CourseWorkingDayId"));
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<TimeOnly>("EndAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("StartAt")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<long>("WorkingDayId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("CourseWorkingDayId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("WorkingDayId");
+
+                    b.ToTable("CourseWorkingDays");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.Language", b =>
                 {
                     b.Property<long>("LanguageId")
@@ -189,6 +482,7 @@ namespace Xsport.API.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("LevelTranslationId");
@@ -222,6 +516,34 @@ namespace Xsport.API.Migrations
                     b.HasIndex("SportId");
 
                     b.ToTable("Matchs");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Mutimedia", b =>
+                {
+                    b.Property<long>("MutimediaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("MutimediaId"));
+
+                    b.Property<long>("AcademyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsCover")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsVideo")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("MutimediaId");
+
+                    b.HasIndex("AcademyId");
+
+                    b.ToTable("Mutimedias");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.RefreshToken", b =>
@@ -260,6 +582,131 @@ namespace Xsport.API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Relative", b =>
+                {
+                    b.Property<long>("RelativeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("RelativeId"));
+
+                    b.HasKey("RelativeId");
+
+                    b.ToTable("Relatives");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.RelativeTranslation", b =>
+                {
+                    b.Property<long>("RelativeTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("RelativeTranslationId"));
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("RelativeId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("RelativeTranslationId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.HasIndex("RelativeId");
+
+                    b.ToTable("RelativeTranslations");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Service", b =>
+                {
+                    b.Property<long>("ServiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ServiceId"));
+
+                    b.HasKey("ServiceId");
+
+                    b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceTranslation", b =>
+                {
+                    b.Property<long>("ServiceTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ServiceTranslationId"));
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ServiceTranslationId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ServiceTranslations");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceValue", b =>
+                {
+                    b.Property<long>("ServiceValueId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ServiceValueId"));
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ServiceValueId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("ServiceValues");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceValueTranslation", b =>
+                {
+                    b.Property<long>("ServiceValueTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ServiceValueTranslationId"));
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("ServiceValueId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ServiceValueTranslationId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.HasIndex("ServiceValueId");
+
+                    b.ToTable("ServiceValueTranslations");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.Sport", b =>
@@ -409,6 +856,7 @@ namespace Xsport.API.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("SportId")
@@ -421,6 +869,40 @@ namespace Xsport.API.Migrations
                     b.HasIndex("SportId");
 
                     b.ToTable("SportTranslations");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.UserCourse", b =>
+                {
+                    b.Property<long>("UserCourseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UserCourseId"));
+
+                    b.Property<long>("CourseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsPersonal")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("RelativeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("XsportUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("UserCourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("RelativeId");
+
+                    b.HasIndex("XsportUserId");
+
+                    b.ToTable("UserCourses");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.UserMatch", b =>
@@ -499,6 +981,49 @@ namespace Xsport.API.Migrations
                     b.HasIndex("UserSportId");
 
                     b.ToTable("UserSportPreferenceValues");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.WorkingDay", b =>
+                {
+                    b.Property<long>("WorkingDayId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("WorkingDayId"));
+
+                    b.Property<int>("OrderInWeek")
+                        .HasColumnType("integer");
+
+                    b.HasKey("WorkingDayId");
+
+                    b.ToTable("WorkingDays");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.WorkingDayTranslation", b =>
+                {
+                    b.Property<long>("WorkingDayTranslationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("WorkingDayTranslationId"));
+
+                    b.Property<long>("LanguageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("WorkingDayId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("WorkingDayTranslationId");
+
+                    b.HasIndex("LanguageId");
+
+                    b.HasIndex("WorkingDayId");
+
+                    b.ToTable("WorkingDayTranslations");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.XsportRole", b =>
@@ -710,6 +1235,177 @@ namespace Xsport.API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyReview", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("AcademyReviews")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.XsportUser", "XsportUser")
+                        .WithMany("AcademyReviews")
+                        .HasForeignKey("XsportUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+
+                    b.Navigation("XsportUser");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyServiceValue", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("AcademyServiceValues")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.ServiceValue", "ServiceValue")
+                        .WithMany("AcademyServiceValues")
+                        .HasForeignKey("ServiceValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+
+                    b.Navigation("ServiceValue");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("AcademyTranslations")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("AcademyTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+
+                    b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AcademyWorkingDay", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("AcademyWorkingDays")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.WorkingDay", "WorkingDay")
+                        .WithMany("AcademyWorkingDays")
+                        .HasForeignKey("WorkingDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+
+                    b.Navigation("WorkingDay");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AgeCategory", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("AgeCategorys")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AgeCategoryTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.AgeCategory", "AgeCategory")
+                        .WithMany("AgeCategoryTranslations")
+                        .HasForeignKey("AgeCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("AgeCategoryTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AgeCategory");
+
+                    b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Course", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("Courses")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.AgeCategory", "AgeCategory")
+                        .WithMany("Courses")
+                        .HasForeignKey("AgeCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Sport", "Sport")
+                        .WithMany("Courses")
+                        .HasForeignKey("SportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+
+                    b.Navigation("AgeCategory");
+
+                    b.Navigation("Sport");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.CourseTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Course", "Course")
+                        .WithMany("CourseTranslations")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("CourseTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.CourseWorkingDay", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Course", "Course")
+                        .WithMany("CourseWorkingDays")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.WorkingDay", "WorkingDay")
+                        .WithMany("CourseWorkingDays")
+                        .HasForeignKey("WorkingDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("WorkingDay");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.Level", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.Sport", "Sport")
@@ -751,6 +1447,17 @@ namespace Xsport.API.Migrations
                     b.Navigation("Sport");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Mutimedia", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Academy", "Academy")
+                        .WithMany("Mutimedias")
+                        .HasForeignKey("AcademyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Academy");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.XsportUser", "User")
@@ -760,6 +1467,74 @@ namespace Xsport.API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.RelativeTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("RelativeTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Relative", "Relative")
+                        .WithMany("RelativeTranslations")
+                        .HasForeignKey("RelativeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("Relative");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("ServiceTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Service", "Service")
+                        .WithMany("ServiceTranslations")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceValue", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Service", "Service")
+                        .WithMany("ServiceValues")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceValueTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("ServiceValueTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.ServiceValue", "ServiceValue")
+                        .WithMany("ServiceValueTranslations")
+                        .HasForeignKey("ServiceValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("ServiceValue");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.SportPreference", b =>
@@ -841,6 +1616,33 @@ namespace Xsport.API.Migrations
                     b.Navigation("Sport");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.UserCourse", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Course", "Course")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.Relative", "Relative")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("RelativeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.XsportUser", "XsportUser")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("XsportUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Relative");
+
+                    b.Navigation("XsportUser");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.UserMatch", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.Match", "Match")
@@ -898,6 +1700,25 @@ namespace Xsport.API.Migrations
                     b.Navigation("UserSport");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.WorkingDayTranslation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Language", "Language")
+                        .WithMany("WorkingDayTranslations")
+                        .HasForeignKey("LanguageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.WorkingDay", "WorkingDay")
+                        .WithMany("WorkingDayTranslations")
+                        .HasForeignKey("WorkingDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Language");
+
+                    b.Navigation("WorkingDay");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.XsportRoleTranslation", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.Language", "Language")
@@ -928,15 +1749,62 @@ namespace Xsport.API.Migrations
                     b.Navigation("Sport");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Academy", b =>
+                {
+                    b.Navigation("AcademyReviews");
+
+                    b.Navigation("AcademyServiceValues");
+
+                    b.Navigation("AcademyTranslations");
+
+                    b.Navigation("AcademyWorkingDays");
+
+                    b.Navigation("AgeCategorys");
+
+                    b.Navigation("Courses");
+
+                    b.Navigation("Mutimedias");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.AgeCategory", b =>
+                {
+                    b.Navigation("AgeCategoryTranslations");
+
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Course", b =>
+                {
+                    b.Navigation("CourseTranslations");
+
+                    b.Navigation("CourseWorkingDays");
+
+                    b.Navigation("UserCourses");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.Language", b =>
                 {
+                    b.Navigation("AcademyTranslations");
+
+                    b.Navigation("AgeCategoryTranslations");
+
+                    b.Navigation("CourseTranslations");
+
                     b.Navigation("LevelTranslations");
+
+                    b.Navigation("RelativeTranslations");
+
+                    b.Navigation("ServiceTranslations");
+
+                    b.Navigation("ServiceValueTranslations");
 
                     b.Navigation("SportPreferenceTranslations");
 
                     b.Navigation("SportPreferenceValueTranslations");
 
                     b.Navigation("SportTranslations");
+
+                    b.Navigation("WorkingDayTranslations");
 
                     b.Navigation("XsportRoleTranslations");
                 });
@@ -951,8 +1819,31 @@ namespace Xsport.API.Migrations
                     b.Navigation("UserMatchs");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Relative", b =>
+                {
+                    b.Navigation("RelativeTranslations");
+
+                    b.Navigation("UserCourses");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.Service", b =>
+                {
+                    b.Navigation("ServiceTranslations");
+
+                    b.Navigation("ServiceValues");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.ServiceValue", b =>
+                {
+                    b.Navigation("AcademyServiceValues");
+
+                    b.Navigation("ServiceValueTranslations");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.Sport", b =>
                 {
+                    b.Navigation("Courses");
+
                     b.Navigation("Levels");
 
                     b.Navigation("Matches");
@@ -983,6 +1874,15 @@ namespace Xsport.API.Migrations
                     b.Navigation("UserSportPreferenceValues");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.WorkingDay", b =>
+                {
+                    b.Navigation("AcademyWorkingDays");
+
+                    b.Navigation("CourseWorkingDays");
+
+                    b.Navigation("WorkingDayTranslations");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.XsportRole", b =>
                 {
                     b.Navigation("XsportRoleTranslations");
@@ -990,6 +1890,10 @@ namespace Xsport.API.Migrations
 
             modelBuilder.Entity("Xsport.DB.Entities.XsportUser", b =>
                 {
+                    b.Navigation("AcademyReviews");
+
+                    b.Navigation("UserCourses");
+
                     b.Navigation("UserMatchs");
 
                     b.Navigation("UserSports");

@@ -35,5 +35,7 @@ namespace Xsport.DB.QueryObjects
                 users.Where(u => u.UserSports.Select(us => us.SportId).Contains(sportId))
                 .AsNoTracking();
         }
+
+
     }
 }
