@@ -139,8 +139,12 @@ namespace Xsport.Core.AcademyServices
                         Phone = academy.Phone,
                         Lat = academy.Lattitude,
                         Long = academy.Longitude,
-                        OpenAt = academy.OpenAt.ToString(XsportConstants.TimeOnlyFormat),
-                        CloseAt = academy.CloseAt.ToString(XsportConstants.TimeOnlyFormat),
+                        OpenAt = academy.AcademyWorkingDays
+                        .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
+                        .OpenAt.ToString(XsportConstants.TimeOnlyFormat),
+                        CloseAt = academy.AcademyWorkingDays
+                        .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
+                        .CloseAt.ToString(XsportConstants.TimeOnlyFormat),
                         MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
                         MaxPrice = academy.Courses
                         .OrderByDescending(c => c.Price).First().Price,

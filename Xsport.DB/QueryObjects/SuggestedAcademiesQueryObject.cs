@@ -21,18 +21,22 @@ namespace Xsport.DB.QueryObjects
                     .Single(t => t.LanguageId == currentLanguageId).Description,
                     Lat = academy.Lattitude,
                     Long = academy.Longitude,
-                    OpenTime = academy.OpenAt.ToString(XsportConstants.TimeOnlyFormat),
-                    CloseTime = academy.CloseAt.ToString(XsportConstants.TimeOnlyFormat),
+                    OpenTime = academy.AcademyWorkingDays
+                    .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
+                    .OpenAt.ToString(XsportConstants.DateTimeFormat),
+                    CloseTime = academy.AcademyWorkingDays
+                    .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
+                    .CloseAt.ToString(XsportConstants.TimeOnlyFormat),
                     MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
                     NumReviews = academy.AcademyReviews.Count,
                     Evaluation = 0,//academy.AcademyReviews.Average(r => r.Evaluation),
                     CoverPhoto = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath) ? ""
                     : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
-                    CoverVideo = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath) ? "" 
+                    CoverVideo = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath) ? ""
                     : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
                     Photos = academy.Mutimedias
                     .Where(m => !m.IsVideo && !m.IsCover)
-                    .Select(m => string.IsNullOrEmpty(m.FilePath)?"": domainName + "/Images/" + m.FilePath).ToList(),
+                    .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
                     Videos = academy.Mutimedias
                     .Where(m => m.IsVideo && !m.IsCover)
                     .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
