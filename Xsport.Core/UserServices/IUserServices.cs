@@ -19,4 +19,6 @@ public interface IUserServices
     public Task<UserProfileDto> SelectCurrentSport(long uId, long sportId, short currentLanguageId);
     public Task<bool> DeleteAccount(long uId);
     public Task<List<PlayersRankingListDto>> GetPlayers(long uId, GetPlayersReqDto dto, short currentLanguageId);
+    public Task<bool> InrollUserInCourse(InrollUserInCourseDto dto);
+    public Task<bool> AddAcademyReview(long uId, AddAcademyReviewDto dto);
 }

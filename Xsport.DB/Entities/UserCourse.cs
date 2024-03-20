@@ -15,11 +15,11 @@ namespace Xsport.DB.Entities
         //foriegn keys
         public long XsportUserId { get; set; }
         public long CourseId { get; set; }
-        public long RelativeId { get; set; }
+        public long? RelativeId { get; set; }
 
         //navigational properties
         public XsportUser XsportUser { get; set; } = null!;
         public Course Course { get; set; } = null!;
-        public Relative Relative { get; set; } = null!;
+        public Relative? Relative { get; set; } = null!;
     }
 }

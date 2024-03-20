@@ -22,7 +22,8 @@ namespace Xsport.DB.Entities
         public ICollection<AcademyWorkingDay> AcademyWorkingDays { get; set; } = null!;
         public ICollection<Mutimedia> Mutimedias { get; set; } = null!;
         public ICollection<AcademyReview> AcademyReviews { get; set; } = null!;
-        public ICollection<AcademyServiceValue> AcademyServiceValues { get; set; } = null!;
         public ICollection<AgeCategory> AgeCategorys { get; set; } = null!;
+        public ICollection<AcademyService> AcademyServices { get; set; } = null!;
+        public ICollection<Stadium>? Stadiums { get; set; }
     }
 }

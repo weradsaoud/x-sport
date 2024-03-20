@@ -15,9 +15,11 @@ namespace Xsport.DB.Entities
         public bool IsCover { get; set; }
 
         //foriegn keys
-        public long AcademyId { get; set; }
+        public long? AcademyId { get; set; }
+        public long? StadiumId { get; set; }
 
         // navigational properties
-        public Academy Academy { get; set; } = null!;
+        public Academy? Academy { get; set; } = null!;
+        public Stadium? Stadium { get; set; } = null!;
     }
 }

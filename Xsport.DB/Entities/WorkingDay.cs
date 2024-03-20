@@ -14,5 +14,6 @@ namespace Xsport.DB.Entities
         public ICollection<WorkingDayTranslation> WorkingDayTranslations { get; set; } = null!;
         public ICollection<AcademyWorkingDay> AcademyWorkingDays { get; set; } = null!;
         public ICollection<CourseWorkingDay> CourseWorkingDays { get; set; } = null!;
+        public ICollection<StadiumWorkingDay> StadiumWorkingDays { get; set; } = null!;
     }
 }

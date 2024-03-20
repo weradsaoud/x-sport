@@ -40,11 +40,14 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<CourseWorkingDay> CourseWorkingDays { get; set; }
     public DbSet<Service> Services { get; set; }
     public DbSet<ServiceTranslation> ServiceTranslations { get; set; }
-    public DbSet<ServiceValue> ServiceValues { get; set; }
-    public DbSet<ServiceValueTranslation> ServiceValueTranslations { get; set; }
-    public DbSet<AcademyServiceValue> AcademyServiceValues { get; set; }
     public DbSet<Relative> Relatives { get; set; }
     public DbSet<RelativeTranslation> RelativeTranslations { get; set; }
     public DbSet<Mutimedia> Mutimedias { get; set; }
     public DbSet<AcademyReview> AcademyReviews { get; set; }
+    public DbSet<Stadium> Stadiums { get; set; }
+    public DbSet<StadiumTranslation> StadiumTranslations { get; set; }
+    public DbSet<StadiumWorkingDay> StadiumWorkingDays { get; set; }
+    public DbSet<StadiumService> StadiumServices { get; set; }
+    public DbSet<AcademyService> AcademyServices { get; set; }
+    public DbSet<StadiumReview> StadiumReviews { get; set; }
 }

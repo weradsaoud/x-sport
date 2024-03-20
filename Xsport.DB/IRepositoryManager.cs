@@ -14,5 +14,16 @@ namespace Xsport.DB
         IUserRepository UserRepository { get; }
         IAcademyRepository AcademyRepository { get; }
         ISportRepository SportRepository { get; }
+        IStadiumRepository StadiumRepository { get; }
+        IMutimediaRepository MutimediaRepository { get; }
+        IServiceRepository ServiceRepository { get; }
+        IStadiumServiceRepository StadiumServiceRepository { get; }
+        IAcademyServiceRepository AcademyServiceRepository { get; }
+        IAcademyWorkingDayRepository AcademyWorkingDayRepository { get; }
+        IWorkingDayRepository WorkingDayRepository { get; }
+        IAgeCategoryRepository AgeCategoryRepository { get; }
+        ICourseRepository CourseRepository { get; }
+        IXsportUserRepository XsportUserRepository { get; }
+        IAcademyReviewRepository AcademyReviewRepository { get; }
     }
 }

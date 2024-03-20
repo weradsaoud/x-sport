@@ -20,6 +20,7 @@ namespace Xsport.DTOs.AcademyDtos
     public class AgeCategoriesWithCoursesInDate
     {
         public long AgeCategoryId { get; set; }
+        public string AgeCategoryName { get; set; } = null!;
         public int FromAge { get; set; }
         public int ToAge { get; set; }
         public IEnumerable<CoursesDto> Courses { get; set; } = null!;

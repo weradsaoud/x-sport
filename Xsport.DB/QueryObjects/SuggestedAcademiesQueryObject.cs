@@ -1,4 +1,5 @@
-﻿using Xsport.Common.Enums;
+﻿using Xsport.Common.Constants;
+using Xsport.Common.Enums;
 using Xsport.DB.Entities;
 using Xsport.DTOs.AcademyDtos;
 
@@ -7,7 +8,7 @@ namespace Xsport.DB.QueryObjects
     public static class SuggestedAcademiesQueryObject
     {
         public static IQueryable<SuggestedAcademyDto> MapAcademiesToSuggested(
-            this IQueryable<Academy> academies, short currentLanguageId)
+            this IQueryable<Academy> academies, short currentLanguageId, string domainName)
         {
             try
             {
@@ -20,19 +21,21 @@ namespace Xsport.DB.QueryObjects
                     .Single(t => t.LanguageId == currentLanguageId).Description,
                     Lat = academy.Lattitude,
                     Long = academy.Longitude,
-                    OpenTime = academy.OpenAt,
-                    CloseTime = academy.CloseAt,
+                    OpenTime = academy.OpenAt.ToString(XsportConstants.TimeOnlyFormat),
+                    CloseTime = academy.CloseAt.ToString(XsportConstants.TimeOnlyFormat),
                     MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
                     NumReviews = academy.AcademyReviews.Count,
-                    Evaluation = academy.AcademyReviews.Average(r => r.Evaluation),
-                    CoverPhoto = academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
-                    CoverVideo = academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
+                    Evaluation = 0,//academy.AcademyReviews.Average(r => r.Evaluation),
+                    CoverPhoto = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath) ? ""
+                    : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
+                    CoverVideo = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath) ? "" 
+                    : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
                     Photos = academy.Mutimedias
                     .Where(m => !m.IsVideo && !m.IsCover)
-                    .Select(m => m.FilePath).ToList(),
+                    .Select(m => string.IsNullOrEmpty(m.FilePath)?"": domainName + "/Images/" + m.FilePath).ToList(),
                     Videos = academy.Mutimedias
                     .Where(m => m.IsVideo && !m.IsCover)
-                    .Select(m => m.FilePath).ToList(),
+                    .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
                 });
             }
             catch (Exception ex)

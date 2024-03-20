@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,6 +8,7 @@ using Xsport.Common.Enums;
 using Xsport.Common.Utils;
 using Xsport.DB;
 using Xsport.DB.Entities;
+using Xsport.DB.QueryObjects;
 using Xsport.DTOs.AcademyDtos;
 using Xsport.DTOs.AdminDtos;
 using Xsport.DTOs.CommonDtos;
@@ -17,18 +19,41 @@ namespace Xsport.Core.AcademyServices
     {
         private IRepositoryManager _repositoryManager;
         private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IHttpContextAccessor httpContextAccessor;
         public AcademyServices(
-            IRepositoryManager repositoryManager, IWebHostEnvironment _webHostEnvironment)
+            IRepositoryManager repositoryManager,
+            IWebHostEnvironment _webHostEnvironment,
+            IHttpContextAccessor _httpContextAccessor)
         {
             _repositoryManager = repositoryManager;
             webHostEnvironment = _webHostEnvironment;
-
+            httpContextAccessor = _httpContextAccessor;
         }
 
         public async Task<List<UserSportsAcademies>> GetSportsMemberShip(long uId, short currentLanguageId)
         {
-            var userSportsAcademies = _repositoryManager.AcademyRepository
-                .GetUserSportsAcademies(uId, currentLanguageId);
+            XsportUser user = await _repositoryManager.XsportUserRepository
+                .FindByCondition(u => u.Id == uId, false)
+                .Include(u => u.UserCourses)
+                .ThenInclude(uc => uc.Course)
+                .ThenInclude(c => c.Academy)
+                .ThenInclude(a => a.AcademyTranslations)
+                .Include(u => u.UserCourses)
+                .ThenInclude(uc => uc.Course)
+                .ThenInclude(c => c.Sport)
+                .ThenInclude(s => s.SportTranslations)
+                .SingleOrDefaultAsync() ?? throw new Exception("User does not exist.");
+            var userSportsAcademies = user.UserCourses.Where(uc => uc.IsPersonal)
+                .Select(uc => new SportMemberShipDto()
+                {
+                    AcademyId = uc.Course.AcademyId,
+                    AcademyName = uc.Course.Academy.AcademyTranslations
+                        .Single(t => t.LanguageId == currentLanguageId).Name,
+                    SportId = uc.Course.SportId,
+                    SportName = uc.Course.Sport.SportTranslations
+                        .Single(t => t.LanguageId == currentLanguageId).Name,
+                    UserPoints = uc.Points
+                }).ToList();
             var SportsAcademiesGroupedBySportId = userSportsAcademies.GroupBy(x => x.SportId);
             List<long> sportsIds = new List<long>();
             List<UserSportsAcademies> sportsAcademies = new List<UserSportsAcademies>();
@@ -77,16 +102,18 @@ namespace Xsport.Core.AcademyServices
         {
             try
             {
-                var academies = _repositoryManager.AcademyRepository
-                    .GetSuggestedAcademies(currentLanguageId,
-                    SuggestedAcademiesOrderOptions.EvaluationDown,
-                    SuggestedAcademiesFilterOptions.None, string.Empty,
-                    dto.PageNumber, dto.PageSize);
-                var suggestedAcademies = await academies
-                    .Where(a => Utils.CalculateDistanceBetweenTowUsers(
-                        user.Latitude ?? 0, user.Longitude ?? 0, a.Lat, a.Long)
-                    <= XsportConstants.SameAreaRaduis).ToListAsync();
-                return suggestedAcademies;
+                string domainName = httpContextAccessor.HttpContext?.Request.Scheme
+                    + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
+                var academies = await _repositoryManager.AcademyRepository.FindAll(false)
+                    .MapAcademiesToSuggested(currentLanguageId, domainName)
+                    .OrderSuggestedAcademies(SuggestedAcademiesOrderOptions.EvaluationDown)
+                    .FilterSuggestedAcademies(SuggestedAcademiesFilterOptions.None, string.Empty)
+                    .Page<SuggestedAcademyDto>(dto.PageNumber, dto.PageSize).ToListAsync();
+                //var suggestedAcademies = await academies
+                //    .Where(a => Utils.CalculateDistanceBetweenTowUsers(
+                //        user.Latitude ?? 0, user.Longitude ?? 0, a.Lat, a.Long)
+                //    <= XsportConstants.SameAreaRaduis).ToListAsync();
+                return academies;
             }
             catch (Exception ex)
             {
@@ -98,8 +125,34 @@ namespace Xsport.Core.AcademyServices
         {
             try
             {
-                return await _repositoryManager.AcademyRepository.GetAboutAcademy(
-                academyId, currentLanguageId);
+                string domainName = httpContextAccessor.HttpContext?.Request.Scheme
+                    + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
+                return await _repositoryManager.AcademyRepository
+                    .FindByCondition(a => a.AcademyId == academyId, false)
+                    .Select(academy => new AboutAcademyDto()
+                    {
+                        AcademyId = academy.AcademyId,
+                        Name = academy.AcademyTranslations
+                        .Single(t => t.LanguageId == currentLanguageId).Name,
+                        Description = academy.AcademyTranslations
+                        .Single(t => t.LanguageId == currentLanguageId).Description,
+                        Phone = academy.Phone,
+                        Lat = academy.Lattitude,
+                        Long = academy.Longitude,
+                        OpenAt = academy.OpenAt.ToString(XsportConstants.TimeOnlyFormat),
+                        CloseAt = academy.CloseAt.ToString(XsportConstants.TimeOnlyFormat),
+                        MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
+                        MaxPrice = academy.Courses
+                        .OrderByDescending(c => c.Price).First().Price,
+                        services = academy.AcademyServices.Select(a => new ServiceDto1()
+                        {
+                            ServiceId = a.ServiceId,
+                            ServiceName = a.Service.ServiceTranslations
+                            .Single(t => t.LanguageId == currentLanguageId).Name,
+                            ImgUrl = string.IsNullOrEmpty(a.Service.ImgPath) ? ""
+                            : domainName + "/Images/" + a.Service.ImgPath
+                        })
+                    }).SingleAsync();
             }
             catch (Exception ex)
             {
@@ -111,8 +164,9 @@ namespace Xsport.Core.AcademyServices
         {
             try
             {
-                return await _repositoryManager.AcademyRepository
-                .GetCoursesInDate(academyId, currentLanguage, DateOnly.FromDateTime(DateTime.Today));
+                return await GetAcademyCoursesInDate(
+                    academyId, currentLanguage,
+                    DateOnly.FromDateTime(DateTime.Today).ToString(XsportConstants.DateOnlyFormat));
             }
             catch (Exception ex)
             {
@@ -120,13 +174,52 @@ namespace Xsport.Core.AcademyServices
             }
         }
         public async Task<AcademyCoursesDto> GetAcademyCoursesInDate(
-            long academyId, short currentLanguage, string targetDate)
+            long academyId, short currentLanguageId, string targetDate)
         {
             try
             {
                 DateOnly date = DateOnly.Parse(targetDate);
                 return await _repositoryManager.AcademyRepository
-                    .GetCoursesInDate(academyId, currentLanguage, date);
+                    .FindByCondition(a => a.AcademyId == academyId, false).Select(a => new AcademyCoursesDto()
+                    {
+                        AcademyId = a.AcademyId,
+                        AcademyName = a.AcademyTranslations
+                        .Single(t => t.LanguageId == currentLanguageId).Name,
+                        CoverVideo = a.Mutimedias.Single(m => m.IsVideo && m.IsCover).FilePath,
+                        CoverPhoto = a.Mutimedias.Single(m => !m.IsVideo && m.IsCover).FilePath,
+                        Photos = a.Mutimedias.Where(m => !m.IsVideo && !m.IsCover)
+                        .Select(p => p.FilePath),
+                        Videos = a.Mutimedias.Where(m => m.IsVideo && !m.IsCover)
+                        .Select(p => p.FilePath),
+                        Date = DateOnly.FromDateTime(DateTime.Today).ToString(XsportConstants.DateOnlyFormat),
+                        AgeCategoriesWithCoursesInDate = a.AgeCategorys
+                        .Select(ac => new AgeCategoriesWithCoursesInDate()
+                        {
+                            AgeCategoryId = ac.AgeCategoryId,
+                            AgeCategoryName = ac.AgeCategoryTranslations
+                            .Single(t => t.LanguageId == currentLanguageId).Name,
+                            FromAge = ac.FromAge,
+                            ToAge = ac.ToAge,
+                            Courses = ac.Courses
+                            .Where(c => c.AcademyId == a.AcademyId)
+                            .Where(c => c.StartDate <= date && c.EndDate >= date)
+                            .Where(c => c.CourseWorkingDays.Select(w => w.WorkingDay.OrderInWeek)
+                            .Contains((int)date.DayOfWeek))
+                            .Select(c => new CoursesDto()
+                            {
+                                CourseId = c.CourseId,
+                                CourseName = c.CourseTranslations
+                                .Single(t => t.LanguageId == currentLanguageId).Name,
+                                Description = c.CourseTranslations
+                                .Single(t => t.LanguageId == currentLanguageId).Description,
+                                StartTime = c.CourseWorkingDays.Single(w => w.WorkingDay.OrderInWeek == (int)date.DayOfWeek).StartAt.ToString(XsportConstants.TimeOnlyFormat),
+                                EndTime = c.CourseWorkingDays.Single(w => w.WorkingDay.OrderInWeek == (int)date.DayOfWeek).EndAt.ToString(XsportConstants.TimeOnlyFormat),
+                                SportId = c.SportId,
+                                SportName = c.Sport.SportTranslations
+                                .Single(t => t.LanguageId == currentLanguageId).Name,
+                            })
+                        })
+                    }).FirstAsync();
             }
             catch (Exception ex)
             {
@@ -139,137 +232,42 @@ namespace Xsport.Core.AcademyServices
         {
             try
             {
-                return await _repositoryManager.AcademyRepository.GetAcademyReviews(
-                    academyId, currentLanguageId);
+                string domainName = httpContextAccessor.HttpContext?.Request.Scheme
+                    + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
+                return await _repositoryManager.AcademyRepository
+                    .FindByCondition(a => a.AcademyId == academyId, false).Select(a => new AcademyReviewDto
+                    {
+                        AcademyId = a.AcademyId,
+                        AcademyName = a.AcademyTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        CoverPhoto = a.Mutimedias.Single(m => !m.IsVideo && m.IsCover).FilePath,
+                        CoverVideo = a.Mutimedias.Single(m => m.IsVideo && m.IsCover).FilePath,
+                        Photos = a.Mutimedias.Where(m => !m.IsVideo && !m.IsCover).Select(p => p.FilePath),
+                        Videos = a.Mutimedias.Where(m => m.IsVideo && !m.IsCover).Select(p => p.FilePath),
+                        Reviews = a.AcademyReviews.Select(r => new ReviewDto
+                        {
+                            ReviewId = r.AcademyReviewId,
+                            UserId = r.XsportUserId,
+                            UserName = r.XsportUser.XsportName ?? string.Empty,
+                            UserImg = string.IsNullOrEmpty(r.XsportUser.ImagePath) ? ""
+                            : domainName + "/Images/" + r.XsportUser.ImagePath,
+                            ReviewContent = r.Description,
+                            Evaluation = r.Evaluation,
+                            ReviewDateTime = r.ReviewDateTime.ToString(XsportConstants.DateTimeFormat),
+                        })
+                    }).FirstAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-        public async Task<bool> AddAcademy(AddAcademyDto dto)
-        {
-            try
-            {
-                string coverPhotoPath = string.Empty;
-                if (dto.CoverPhoto != null)
-                    coverPhotoPath = await Utils.UploadImageFileAsync(
-                        dto.CoverPhoto, 10, webHostEnvironment);
-                string coverVideoPath = string.Empty;
-                if (dto.CoverVideo != null)
-                    coverVideoPath = await Utils.UploadImageFileAsync(
-                        dto.CoverVideo, 10, webHostEnvironment);
-                List<string> PhotosPathes = new List<string>();
-                if (dto.Photos != null && dto.Photos.Count > 0)
-                    foreach (var photo in dto.Photos)
-                    {
-                        string photoPath = await Utils.UploadImageFileAsync(
-                            photo, 10, webHostEnvironment);
-                        PhotosPathes.Add(photoPath);
-                    }
-                List<string> videosPathes = new List<string>();
-                if (dto.Videos != null && dto.Videos.Count > 0)
-                    foreach (var video in dto.Videos)
-                    {
-                        string videoPath = await Utils.UploadImageFileAsync(
-                            video, 10, webHostEnvironment);
-                        videosPathes.Add(videoPath);
-                    }
-                await _repositoryManager.AcademyRepository
-                    .AddAcademy(dto, coverPhotoPath, coverVideoPath, PhotosPathes, videosPathes);
-                return true;
-            }
-            catch(Exception ex) 
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task<bool> AddService(AddServiceDto dto)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.AddService(dto);
-            }
-            catch(Exception ex) 
-            {
-                throw new Exception(ex.Message);
-            }
-        }
+
+
         public async Task<bool> AddWorkingDays(AddWorkingDaysDto dto)
         {
             try
             {
                 return await _repositoryManager.AcademyRepository.AddWorkingDays(dto);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task<List<GetWorkingDayDto>> GetWorkingDays(short currentLanguageId)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.GetWorkingDays(currentLanguageId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task<List<GetServicesDto>> GetServices(short currentLanguageId)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.GetServices(currentLanguageId);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<AgeCategory> AddAgeCategory(AddAgeCategoryDto dto)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.AddAgeCategory(dto);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<Course> AddCourse(AddCourseDto dto)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.AddCourse(dto);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<bool> InrollUserInCourse(long uId, long courseId, bool isPersonal)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.InrollUserInCourse(uId, courseId, isPersonal);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<bool> AddServiceToAcademy(long academyId, long serviceValueId)
-        {
-            try
-            {
-                return await _repositoryManager.AcademyRepository.AddServiceToAcademy(academyId, serviceValueId);
             }
             catch (Exception ex)
             {

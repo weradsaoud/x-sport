@@ -391,7 +391,7 @@ public class UserServices : IUserServices
             XsportUser user = await _db.XsportUsers.Include(u => u.UserSports)
                 .SingleOrDefaultAsync(u => u.Id == uId) ??
                 throw new Exception("User does not exist");
-            if(dto.SportsIds == null) throw new Exception("Please, choose at least one sport.");
+            if (dto.SportsIds == null) throw new Exception("Please, choose at least one sport.");
             if (dto.SportsIds?.Count == 0) throw new Exception("Please, choose at least one sport.");
             List<long> existingSportsIds = user.UserSports.Select(us => us.SportId).ToList();
             List<long> toBeDeletedSportsIds = existingSportsIds.Except(dto.SportsIds).ToList();
@@ -540,6 +540,7 @@ public class UserServices : IUserServices
     {
         try
         {
+            string domainName = httpContextAccessor.HttpContext?.Request.Scheme + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
             var user = await _repositoryManager.UserRepository.FindByConditionWithEagerLoad(false,
                 u => u.Id == uId,
                 u => u.UserSports).FirstAsync();
@@ -556,10 +557,59 @@ public class UserServices : IUserServices
                 PlayersRankingListFilterOptions.ByPlayerName,
                 dto.Name ?? string.Empty,
                 dto.PageInfo.PageNumber,
-                dto.PageInfo.PageSize);
+                dto.PageInfo.PageSize, domainName);
             return players.Where(p => Utils.CalculateDistanceBetweenTowUsers(
                 user.Latitude ?? 0, user.Longitude ?? 0, p.Lat, p.Long)
             <= XsportConstants.SameAreaRaduis).ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<bool> InrollUserInCourse(InrollUserInCourseDto dto)
+    {
+        try
+        {
+            XsportUser user = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Id == dto.UId) ??
+                throw new Exception("User does not exist.");
+            Course course = await _db.Courses.SingleOrDefaultAsync(_ => _.CourseId == dto.CourseId) ??
+                throw new Exception("Course does not exist.");
+            UserCourse userCourse = new UserCourse()
+            {
+                CourseId = dto.CourseId,
+                XsportUserId = dto.UId,
+                Points = 0,
+                IsPersonal = dto.IsPersonal
+            };
+            await _db.UserCourses.AddAsync(userCourse);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<bool> AddAcademyReview(long uId, AddAcademyReviewDto dto)
+    {
+        try
+        {
+            Academy academy = await _repositoryManager.AcademyRepository
+                .FindByCondition(a => a.AcademyId == dto.AcademyId, false)
+                .SingleOrDefaultAsync() ?? throw new Exception("Academy does not exist.");
+            DateTime reviewDateTime = DateTime.UtcNow;
+            AcademyReview review = new AcademyReview()
+            {
+                AcademyId = dto.AcademyId,
+                XsportUserId = uId,
+                Description = dto.ReviewText,
+                Evaluation = dto.Evaluation,
+                ReviewDateTime = reviewDateTime,
+            };
+            await _repositoryManager.AcademyReviewRepository.CreateAsync(review);
+            await _repositoryManager.AcademyReviewRepository.SaveChangesAsync();
+            return true;
         }
         catch (Exception ex)
         {

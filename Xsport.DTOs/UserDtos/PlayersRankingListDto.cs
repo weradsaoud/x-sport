@@ -8,5 +8,6 @@
         public string Level { get; set; } = null!;
         public decimal Lat { get; set; }
         public decimal Long { get; set; }
+        public string ProfileImgUrl { get; set; } = null!;
     }
 }

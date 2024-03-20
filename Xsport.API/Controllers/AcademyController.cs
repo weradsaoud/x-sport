@@ -75,7 +75,7 @@ public class AcademyController : BaseController
     [HttpGet]
     public async Task<AcademyCoursesDto> GetAcademyCourses([FromQuery] long academyId)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             try
             {
@@ -95,7 +95,7 @@ public class AcademyController : BaseController
     [HttpGet]
     public async Task<AcademyCoursesDto> GetAcademyCoursesInDate([FromQuery] long academyId, [FromQuery] string targetDate)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             try
             {
@@ -117,7 +117,7 @@ public class AcademyController : BaseController
     [HttpGet]
     public async Task<AcademyReviewDto> GetAcademyReviews([FromQuery] long academyId)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             try
             {

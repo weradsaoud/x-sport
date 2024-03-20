@@ -23,6 +23,12 @@ using System.Net;
 using Xsport.Core.SportServices;
 using Xsport.Core.CommonServices;
 using Xsport.Core.AcademyServices;
+using Xsport.Core.StadiumServices;
+using Xsport.Core.MNGServices.StadiumMNGServices;
+using Xsport.Core.MNGServices.ServiceMNGServices;
+using Xsport.Core.MNGServices.AcademyMNGServices;
+using Xsport.Core.MNGServices.AgeCategoryMNGServices;
+using Xsport.Core.MNGServices.CourseMNGServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("AWSConnection");
@@ -130,6 +136,12 @@ builder.Services.AddScoped<ISportServices, SportServices>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<ICommonServices, CommonServices>();
 builder.Services.AddScoped<IAcademyServices, AcademyServices>();
+builder.Services.AddScoped<IStadiumServices, StadiumServices>();
+builder.Services.AddScoped<IStadiumMNGService, StadiumMNGService>();
+builder.Services.AddScoped<IServiceMNGService, ServiceMNGService>();
+builder.Services.AddScoped<IAcademyMNGService, AcademyMNGService>();
+builder.Services.AddScoped<IAgeCategoryMNGService, AgeCategoryMNGService>();
+builder.Services.AddScoped<ICourseMNGService, CourseMNGService>();
 
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
@@ -164,10 +176,10 @@ app.UseCors(x => x
 
 app.UseStaticFiles();
 //if (app.Environment.IsDevelopment())
-    //{
-    //    app.UseSwagger();
-    //    app.UseSwaggerUI();
-    //}
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
 app.UseSwagger();
 app.UseSwaggerUI();
 //app.UseHttpsRedirection();

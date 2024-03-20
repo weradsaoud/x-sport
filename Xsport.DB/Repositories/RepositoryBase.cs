@@ -46,5 +46,24 @@ namespace Xsport.DB.Repositories
         public void Create(T entity) => _db.Set<T>().Add(entity);
         public void Update(T entity) => _db.Set<T>().Update(entity);
         public void Delete(T entity) => _db.Set<T>().Remove(entity);
+
+        public Task<IQueryable<T>> FindAllAsync(bool trackChanges)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IQueryable<T>> FindByConditionAsync(Expression<Func<T, bool>> expression, bool trackChanges)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task CreateAsync(T entity)
+        {
+            await _db.Set<T>().AddAsync(entity);
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _db.SaveChangesAsync();
+        }
     }
 }

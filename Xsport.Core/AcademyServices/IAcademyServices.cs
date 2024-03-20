@@ -21,14 +21,6 @@ namespace Xsport.Core.AcademyServices
         public Task<AcademyCoursesDto> GetAcademyCoursesInDate(
             long academyId, short currentLanguage, string targetDate);
         public Task<AcademyReviewDto> GetAcademyReviews(long academyId, short currentLanguageId);
-        public Task<bool> AddAcademy(AddAcademyDto dto);
-        public Task<bool> AddService(AddServiceDto dto);
         public Task<bool> AddWorkingDays([FromBody] AddWorkingDaysDto dto);
-        public Task<List<GetWorkingDayDto>> GetWorkingDays(short currentLanguageId);
-        public Task<List<GetServicesDto>> GetServices(short currentLanguageId);
-        public Task<AgeCategory> AddAgeCategory(AddAgeCategoryDto dto);
-        public Task<Course> AddCourse(AddCourseDto dto);
-        public Task<bool> InrollUserInCourse(long uId, long courseId, bool isPersonal);
-        public Task<bool> AddServiceToAcademy(long academyId, long serviceValueId);
     }
 }
