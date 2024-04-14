@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xsport.Db;
+using Xsport.DB;
 using Xsport.DB.Repositories;
 using Xsport.DB.RepositoryInterfaces;
 
@@ -37,6 +37,10 @@ namespace Xsport.DB
         ICourseRepository _courseRepository;
         IXsportUserRepository _xsportUserRepository;
         IAcademyReviewRepository _academyReviewRepository;
+        IFloorRepository _floorRepository;
+        IRelativeRepository _relativeRepository;
+        IUserCourseRepository _userCourseRepository;
+        IGenderRepository _genderRepository;
         public IUserRepository UserRepository
         {
             get
@@ -147,6 +151,38 @@ namespace Xsport.DB
             {
                 _academyReviewRepository ??= new AcademyReviewRepository(db);
                 return _academyReviewRepository;
+            }
+        }
+        public IFloorRepository FloorRepository
+        {
+            get
+            {
+                _floorRepository ??= new FloorRepository(db);
+                return _floorRepository;
+            }
+        }
+        public IRelativeRepository RelativeRepository 
+        {
+            get
+            {
+                _relativeRepository ??= new RelativeRepository(db);
+                return _relativeRepository;
+            }
+        }
+        public IUserCourseRepository UserCourseRepository
+        {
+            get
+            {
+                _userCourseRepository ??= new UserCourseRepository(db);
+                return _userCourseRepository;
+            }
+        }
+        public IGenderRepository GenderRepository
+        {
+            get
+            {
+                _genderRepository ??= new GenderRepository(db);
+                return _genderRepository;
             }
         }
         public void Dispose() => _db.Dispose();

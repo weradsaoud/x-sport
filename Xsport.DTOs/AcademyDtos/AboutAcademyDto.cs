@@ -13,6 +13,7 @@ namespace Xsport.DTOs.AcademyDtos
         public string Description { get; set; } = null!;
         public decimal Lat { get; set; }
         public decimal Long { get; set; }
+        public string RegionName { get; set; } = "تضاف لاحقا";
         public decimal MinPrice { get; set; }
         public decimal MaxPrice { get; set; }
         public string Phone { get; set; } = null!;

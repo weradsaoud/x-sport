@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xsport.Common.Constants;
 using Xsport.Common.Enums;
-using Xsport.Db;
+using Xsport.DB;
 using Xsport.DB.Entities;
 using Xsport.DB.QueryObjects;
 using Xsport.DB.RepositoryInterfaces;

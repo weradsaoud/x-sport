@@ -18,6 +18,7 @@ namespace Xsport.DTOs.CourseDtos.MNGDtos
         public long AcademyId { get; set; }
         public long SportId { get; set; }
         public long AgeCategoryId { get; set; }
+        public long GenderId { get; set; }
         public List<CourseWorkingDayDto1> WorkingDays { get; set; } = null!;
     }
     public class CourseWorkingDayDto1

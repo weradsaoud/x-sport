@@ -12,6 +12,7 @@ namespace Xsport.DTOs.StadiumDtos.MNGDtos
         public long Id { get; set; }
         public long SportId { get; set; }
         public long? AcademyId { get; set; }
+        public long FloorId { get; set; }
         public string ArName { get; set; } = null!;
         public string EnName { get; set; } = null!;
         public string ArDescription { get; set; } = null!;

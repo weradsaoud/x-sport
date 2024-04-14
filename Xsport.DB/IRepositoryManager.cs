@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Xsport.Db;
 using Xsport.DB.RepositoryInterfaces;
 
 namespace Xsport.DB
@@ -25,5 +24,9 @@ namespace Xsport.DB
         ICourseRepository CourseRepository { get; }
         IXsportUserRepository XsportUserRepository { get; }
         IAcademyReviewRepository AcademyReviewRepository { get; }
+        IFloorRepository FloorRepository { get; }
+        IRelativeRepository RelativeRepository { get; }
+        IUserCourseRepository UserCourseRepository { get; }
+        IGenderRepository GenderRepository { get; }
     }
 }

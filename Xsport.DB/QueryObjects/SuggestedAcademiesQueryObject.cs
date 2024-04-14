@@ -23,13 +23,15 @@ namespace Xsport.DB.QueryObjects
                     Long = academy.Longitude,
                     OpenTime = academy.AcademyWorkingDays
                     .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
-                    .OpenAt.ToString(XsportConstants.DateTimeFormat),
+                    .OpenAt.ToString(XsportConstants.TimeOnlyFormat),
                     CloseTime = academy.AcademyWorkingDays
                     .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
                     .CloseAt.ToString(XsportConstants.TimeOnlyFormat),
                     MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
                     NumReviews = academy.AcademyReviews.Count,
-                    Evaluation = 0,//academy.AcademyReviews.Average(r => r.Evaluation),
+                    Evaluation = (academy.AcademyReviews.Count == 0) ?
+                    0 :
+                    academy.AcademyReviews.Select(r => r.Evaluation).Average(),
                     CoverPhoto = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath) ? ""
                     : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
                     CoverVideo = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath) ? ""
@@ -40,6 +42,16 @@ namespace Xsport.DB.QueryObjects
                     Videos = academy.Mutimedias
                     .Where(m => m.IsVideo && !m.IsCover)
                     .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
+                    AgeCategoriesDropdownItems = academy.AgeCategorys.Select(ac => new DTOs.DropDownDto()
+                    {
+                        Id = ac.AgeCategoryId,
+                        Name = ac.AgeCategoryTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        Info = new DTOs.AdditionalInfo()
+                        {
+                            From = ac.FromAge,
+                            To = ac.ToAge,
+                        }
+                    }).ToList(),
                 });
             }
             catch (Exception ex)

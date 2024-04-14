@@ -2,7 +2,7 @@
 using Xsport.Common.Constants;
 using Xsport.Common.Enums;
 using Xsport.Common.Utils;
-using Xsport.Db;
+using Xsport.DB;
 using Xsport.DB.Entities;
 using Xsport.DB.QueryObjects;
 using Xsport.DB.RepositoryInterfaces;

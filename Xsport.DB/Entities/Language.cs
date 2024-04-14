@@ -17,4 +17,6 @@ public class Language
     public ICollection<ServiceTranslation> ServiceTranslations { get; set; } = null!;
     public ICollection<CourseTranslation> CourseTranslations { get; set; } = null!;
     public ICollection<StadiumTranslation> StadiumTranslations { get; set; } = null!;
+    public ICollection<FloorTranslation> FloorTranslations { get; set; } = null!;
+    public ICollection<GenderTranslation> GenderTranslations { get; set; } = null!;
 }

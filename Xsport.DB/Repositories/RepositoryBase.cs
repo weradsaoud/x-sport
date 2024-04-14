@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using Xsport.Db;
+using Xsport.DB;
 using Xsport.DB.RepositoryInterfaces;
 
 namespace Xsport.DB.Repositories

@@ -35,6 +35,9 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                 Academy? academy = dto.AcademyId.HasValue ? await _repManager.AcademyRepository
                     .FindByCondition(a => a.AcademyId == dto.AcademyId, false)
                     .SingleOrDefaultAsync() ?? throw new Exception("Academy does not exist.") : null;
+                Floor floor = await _repManager.FloorRepository
+                    .FindByCondition(f => f.FloorId == dto.FloorId, false)
+                    .SingleOrDefaultAsync() ?? throw new Exception("Floor does not exist.");
                 Stadium stadium = new Stadium()
                 {
                     StadiumTranslations = new List<StadiumTranslation>()
@@ -56,6 +59,7 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                     //Sport = sport,
                     AcademyId = dto.AcademyId,
                     //Academy = academy,
+                    FloorId = dto.FloorId,
                     Latitude = dto.Lat,
                     Longitude = dto.Long,
                     Price = dto.Price

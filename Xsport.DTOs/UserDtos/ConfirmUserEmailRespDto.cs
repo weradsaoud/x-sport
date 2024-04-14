@@ -10,6 +10,7 @@ namespace Xsport.DTOs.UserDtos
     public class ConfirmUserEmailRespDto
     {
         public AuthResult AuthResult { get; set; } = null!;
-        public List<SportDto> Sports { get; set; } = null!;
+        public List<SportDto>? Sports { get; set; } = null!;
+        public UserProfileDto? UserProfile { get; set; } = null!;
     }
 }

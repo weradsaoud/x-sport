@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Xsport.DB.Entities;
-namespace Xsport.Db;
+namespace Xsport.DB;
 public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
-{
+{   
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
         //this.Database.CommandTimeout = 180; // Timeout duration in seconds
@@ -50,4 +50,17 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<StadiumService> StadiumServices { get; set; }
     public DbSet<AcademyService> AcademyServices { get; set; }
     public DbSet<StadiumReview> StadiumReviews { get; set; }
+    public DbSet<Floor> Floors { get; set; }
+    public DbSet<FloorTranslation> FloorTranslations { get; set; }
+    public DbSet<Gender> Genders { get; set; }
+    public DbSet<GenderTranslation> GenderTranslations { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AcademyWorkingDay>()
+            .HasIndex(awd => new { awd.AcademyId, awd.WorkingDayId })
+            .IsUnique();
+    }
 }

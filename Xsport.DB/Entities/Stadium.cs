@@ -16,7 +16,7 @@ namespace Xsport.DB.Entities
         //foriegn keys
         public long SportId { get; set; }
         public long? AcademyId { get; set; }
-
+        public long FloorId { get; set; }
         //navigational props
         public ICollection<StadiumTranslation> StadiumTranslations { get; set; } = null!;
         public ICollection<Mutimedia> Mutimedias { get; set; } = null!;
@@ -25,5 +25,6 @@ namespace Xsport.DB.Entities
         public ICollection<StadiumReview> StadiumReviews { get; set; } = null!;
         public Sport Sport { get; set; } = null!;
         public Academy? Academy { get; set; } = null!;
+        public Floor Floor { get; set; } = null!;
     }
 }

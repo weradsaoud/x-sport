@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 
 namespace Xsport.DB.Entities;
-public class XsportUser: IdentityUser<long>
+public class XsportUser : IdentityUser<long>
 {
     //public long XsportUserId { get; set; }
     public string? Uid { get; set; }
     public string? XsportName { get; set; }
+    public string AuthenticationProvider { get; set; } = null!;
+    public string? NewEmail { get; set; } = null!;
     //public string? Email { get; set; }
     //public string? Phone { get; set; }
     public string? EmailConfirmationCode { get; set; }

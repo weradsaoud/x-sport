@@ -1,4 +1,4 @@
-namespace Xsport.DTOs.UserDtos
+﻿namespace Xsport.DTOs.UserDtos
 {
     public class UserProfileDto
     {
@@ -14,11 +14,14 @@ namespace Xsport.DTOs.UserDtos
         public int LoyaltyPoints { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
+        public string? NewEmail { get; set; }
         public string? Phone { get; set; }
         public string? Gender { get; set; }
         public decimal? Longitude { get; set; }
         public decimal? Latitude { get; set; }
+        public string RegionName { get; set; } = "تضاف لاحقا";
         public string? ImgURL { get; set; }
+        public string AuthenticationProvider { get; set; } = null!;
     }
     public class FavoriteSportDto
     {

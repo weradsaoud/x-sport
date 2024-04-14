@@ -33,11 +33,15 @@ namespace Xsport.Core.MNGServices.CourseMNGServices
                 AgeCategory? ageCategory = await _repManager.AgeCategoryRepository
                     .FindByCondition(a => a.AgeCategoryId == dto.AgeCategoryId, false)
                     .SingleOrDefaultAsync() ?? throw new Exception("Age Category does not exist.");
+                Gender gender = await _repManager.GenderRepository
+                    .FindByCondition(g => g.GenderId == dto.GenderId, false)
+                    .SingleOrDefaultAsync() ?? throw new Exception("Gender does not exist.");
                 Course course = new Course()
                 {
                     AcademyId = dto.AcademyId,
                     SportId = dto.SportId,
                     AgeCategoryId = dto.AgeCategoryId,
+                    GenderId = dto.GenderId,
                     StartDate = DateOnly.Parse(dto.StartDate),
                     EndDate = DateOnly.Parse(dto.EndDate),
                     Price = dto.Price,
