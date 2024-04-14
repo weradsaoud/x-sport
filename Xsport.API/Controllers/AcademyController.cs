@@ -8,8 +8,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Xsport.Core;
 using Xsport.Core.AcademyServices;
 using Xsport.Core.SportServices;
+using Xsport.DTOs;
 using Xsport.DTOs.AcademyDtos;
+using Xsport.DTOs.AgeCategoryDtos;
 using Xsport.DTOs.CommonDtos;
+using Xsport.DTOs.GenderDtos;
 using Xsport.DTOs.UserDtos;
 
 namespace Xsport.API.Controllers;
@@ -25,30 +28,58 @@ public class AcademyController : BaseController
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
-    public async Task<List<UserSportsAcademies>> GetSportsMemberShip()
+    public async Task<List<SubscribedAcademyDto>> GetMemberShips()
     {
         try
         {
             if (LoggedInUser == null) throw new ApiException("You are not signed in.");
-            return await _academyServices.GetSportsMemberShip(LoggedInUser.Id, CurrentLanguageId);
+            return await _academyServices.GetMemberShips(LoggedInUser.Id, CurrentLanguageId);
         }
         catch (Exception ex)
         {
             throw new ApiException(ex.Message);
         }
     }
+
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
-    public async Task<List<SuggestedAcademyDto>> GetSuggestedAcademies([FromQuery] PagingDto dto)
+    public async Task<SuggestedAcademiesDto> GetSuggestedAcademies(
+        [FromQuery] long sportId, [FromQuery] int pageNumber, [FromQuery] int pageSize)
     {
         try
         {
-            if (LoggedInUser == null) throw new ApiException("You are not signed in.");
-            return await _academyServices.GetSuggestedAcademies(LoggedInUser, dto, CurrentLanguageId);
+            if (LoggedInUser == null) throw new ApiException("You are not signed in.", 500);
+            PagingDto dto = new PagingDto()
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            return await _academyServices.GetSuggestedAcademies(
+                LoggedInUser, sportId, dto, CurrentLanguageId);
         }
         catch (Exception ex)
         {
-            throw new ApiException(ex.Message);
+            throw new ApiException(ex.Message, 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<SuggestedAcademiesDto> GetAllAcademies([FromQuery] int pageNumber, [FromQuery] int pageSize)
+    {
+        try
+        {
+            if (LoggedInUser == null) throw new ApiException("You are not signed in.", 500);
+            PagingDto dto = new PagingDto()
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            return await _academyServices.GetAllAcademies(
+                LoggedInUser, dto, CurrentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new ApiException(ex.Message, 500);
         }
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -73,51 +104,133 @@ public class AcademyController : BaseController
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
-    public async Task<AcademyCoursesDto> GetAcademyCourses([FromQuery] long academyId)
+    public async Task<List<AgeCategoryWithCoursesDto>> GetAcademyCourses([FromQuery] long academyId)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             try
             {
-                return await _academyServices.GetAcademyCoursesToday(academyId, CurrentLanguageId);
+                return await _academyServices.GetAcademyCourses(academyId, CurrentLanguageId);
             }
             catch (Exception ex)
             {
-                throw new ApiException(ex.Message);
+                throw new ApiException(ex.Message, 500);
             }
         }
         else
         {
-            throw new ApiException("Invalid Inputs");
-        }
-    }
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [HttpGet]
-    public async Task<AcademyCoursesDto> GetAcademyCoursesInDate([FromQuery] long academyId, [FromQuery] string targetDate)
-    {
-        if (!ModelState.IsValid)
-        {
-            try
-            {
-                return await _academyServices.GetAcademyCoursesInDate(
-                    academyId, CurrentLanguageId, targetDate);
-            }
-            catch (Exception ex)
-            {
-                throw new ApiException(ex.Message);
-            }
-        }
-        else
-        {
-            throw new ApiException("Invalid Inputs");
+            throw new ApiException("Invalid Inputs", 500);
         }
     }
 
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
+    public async Task<List<DropDownDto>> GetAgeCategories([FromQuery] long academyId)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _academyServices.GetAgeCategories(academyId, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<List<DropDownDto>> GetGenders()
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _academyServices.GetGenders(CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<List<DropDownDto>> GetRelatives()
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _academyServices.GetRelatives(CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<List<AgeCategoryCourseDto>> GetCoursesToSubscribe(
+            long academyId, long ageCategoryId, long genderId)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _academyServices.GetCoursesToSubscribe(academyId, ageCategoryId, genderId, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[HttpGet]
+    //public async Task<AcademyCoursesDto> GetAcademyCoursesInDate([FromQuery] long academyId, [FromQuery] string targetDate)
+    //{
+    //    if (ModelState.IsValid)
+    //    {
+    //        try
+    //        {
+    //            return await _academyServices.GetAcademyCoursesInDate(
+    //                academyId, CurrentLanguageId, targetDate);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            throw new ApiException(ex.Message);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        throw new ApiException("Invalid Inputs");
+    //    }
+    //}
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
     public async Task<AcademyReviewDto> GetAcademyReviews([FromQuery] long academyId)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             try
             {

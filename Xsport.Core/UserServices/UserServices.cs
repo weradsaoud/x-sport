@@ -7,7 +7,6 @@ using System.Security.Claims;
 using System.Text;
 using Xsport.Common.Emuns;
 using Xsport.Common.Utils;
-using Xsport.Db;
 using Xsport.DB.Entities;
 using Xsport.Common.Models;
 using Xsport.DTOs.UserDtos;
@@ -66,8 +65,10 @@ public class UserServices : IUserServices
             //check if user exists
             var existingUser = await userManager.FindByEmailAsync(user.Email);
             if (existingUser != null) throw new Exception($"{user.Email} is already taken");
-            string confirmationCode = await SendActivationCode(user.Email);
-            if (confirmationCode.IsNullOrEmpty()) throw new Exception("Could not generate confirmation code");
+            //string confirmationCode = await SendActivationCode(user.Email);
+            //if (confirmationCode.IsNullOrEmpty())
+            //    throw new Exception("Could not generate confirmation code");
+            string confirmationCode = GenerateEmailConfirmationCode();
             XsportUser xsportUser = new XsportUser()
             {
                 Email = user.Email,
@@ -79,7 +80,8 @@ public class UserServices : IUserServices
                 Latitude = user.Latitude,
                 Longitude = user.Longitude,
                 EmailConfirmationCode = confirmationCode,
-                ImagePath = ""
+                ImagePath = "",
+                AuthenticationProvider = "EmailPassword"
             };
             var isCreated = await userManager.CreateAsync(xsportUser, user.Password);
             if (!isCreated.Succeeded)
@@ -92,15 +94,18 @@ public class UserServices : IUserServices
 
                 throw new Exception(errorMessage);
             }
-            //List<SportDto> sports = _db.Sports.Select(s => new SportDto()
-            //{
-            //    SportId = s.SportId,
-            //    SportName = (s.SportTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
-            //}).ToList();
-            //return new RegisterResponseDto()
-            //{
-            //    Sports = sports,
-            //};
+            try
+            {
+                var message = new Message(
+                    new List<string>() { user.Email ?? string.Empty },
+                    "Account Confirmation", confirmationCode, null);
+                await emailService.SendEmailAsync(message);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Confirmation email could not be sent. " +
+                    "Please, make sure you entered a valide email address");
+            }
             return true;
         }
         catch (Exception ex)
@@ -112,11 +117,21 @@ public class UserServices : IUserServices
     {
         try
         {
-            var user = await userManager.FindByEmailAsync(dto.Email);
-            if (user == null) throw new Exception("User does not exist");
-            string code = await SendActivationCode(dto.Email);
+            var oldEmailUser = await userManager.FindByEmailAsync(dto.Email);
+            string code = string.Empty;
+            if (oldEmailUser == null)
+            {
+                var newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email)??
+                    throw new Exception("User does not exist.");
+                code = await SendActivationCode(dto.Email);
+                if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
+                newEmailUser.EmailConfirmationCode = code;
+                await _db.SaveChangesAsync();
+                return true;
+            }
+            code = await SendActivationCode(dto.Email);
             if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
-            user.EmailConfirmationCode = code;
+            oldEmailUser.EmailConfirmationCode = code;
             await _db.SaveChangesAsync();
             return true;
         }
@@ -129,28 +144,47 @@ public class UserServices : IUserServices
     {
         try
         {
-            var user = await userManager.FindByEmailAsync(dto.Email) ??
-            throw new Exception("User does not exist");
-            bool isCorrect = await userManager.CheckPasswordAsync(user, dto.Password);
+            XsportUser? oldEmailUser = await userManager.FindByEmailAsync(dto.Email);
+            bool isCorrect = false;
+            var jwtToken = new AuthResult();
+            if (oldEmailUser == null)
+            {
+                XsportUser? newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email) ??
+                    throw new Exception("User does not exist.");
+                isCorrect = await userManager.CheckPasswordAsync(newEmailUser, dto.Password);
+                if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
+                if (newEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
+                newEmailUser.Email = newEmailUser.NewEmail;
+                newEmailUser.NormalizedEmail = newEmailUser.NewEmail?.ToUpperInvariant();
+                newEmailUser.NormalizedUserName = newEmailUser.NewEmail?.ToUpperInvariant();
+                newEmailUser.NewEmail = null;
+                await _db.SaveChangesAsync();
+                jwtToken = await GenerateJwtToken(newEmailUser, GeneralConfig?.EnableTwoFactor ?? false);
+                UserProfileDto userProfile = await GetUserProfile(newEmailUser.Id, currentLanguageId);
+                return new ConfirmUserEmailRespDto()
+                {
+                    AuthResult = jwtToken,
+                    Sports = null,
+                    UserProfile = userProfile
+                };
+            }
+            isCorrect = await userManager.CheckPasswordAsync(oldEmailUser, dto.Password);
             if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
-            if (user.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
-            user.EmailConfirmed = true;
+            if (oldEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
+            oldEmailUser.EmailConfirmed = true;
             await _db.SaveChangesAsync();
-            var jwtToken = await GenerateJwtToken(user, GeneralConfig?.EnableTwoFactor ?? false);
+            jwtToken = await GenerateJwtToken(oldEmailUser, GeneralConfig?.EnableTwoFactor ?? false);
             List<SportDto> sports = _db.Sports.Select(s => new SportDto()
             {
                 SportId = s.SportId,
-                SportName = (s.SportTranslations.SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
+                SportName = (s.SportTranslations
+                .SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
             }).ToList();
-            //return await LoginAsync(new UserLoginRequest()
-            //{
-            //    Email = dto.Email,
-            //    Password = dto.Password
-            //}, currentLanguageId);
             return new ConfirmUserEmailRespDto()
             {
                 AuthResult = jwtToken,
-                Sports = sports
+                Sports = sports,
+                UserProfile = null
             };
         }
         catch (Exception ex)
@@ -230,7 +264,8 @@ public class UserServices : IUserServices
                     Gender = dto.Gender,
                     Latitude = dto.Latitude,
                     Longitude = dto.Longitude,
-                    ImagePath = ""
+                    ImagePath = "",
+                    AuthenticationProvider = "Google"
                 };
                 var isCreated = await userManager.CreateAsync(xsportUser);
                 if (!isCreated.Succeeded) throw new Exception("User could not be created successfully.");
@@ -334,12 +369,14 @@ public class UserServices : IUserServices
                 UserId = user.Id,
                 Name = user.XsportName,
                 Email = user.Email,
+                NewEmail = user.NewEmail,
                 Phone = user.PhoneNumber,
                 Gender = user.Gender,
                 LoyaltyPoints = user.LoyaltyPoints,
                 Longitude = user.Longitude,
                 Latitude = user.Latitude,
-                ImgURL = string.IsNullOrEmpty(user.ImagePath) ? "" : domainName + "/Images/" + user.ImagePath
+                ImgURL = string.IsNullOrEmpty(user.ImagePath) ? "" : domainName + "/Images/" + user.ImagePath,
+                AuthenticationProvider = user.AuthenticationProvider,
             },
             FavoriteSports = user.UserSports?.Select(userSport =>
             {
@@ -391,7 +428,7 @@ public class UserServices : IUserServices
             XsportUser user = await _db.XsportUsers.Include(u => u.UserSports)
                 .SingleOrDefaultAsync(u => u.Id == uId) ??
                 throw new Exception("User does not exist");
-            if(dto.SportsIds == null) throw new Exception("Please, choose at least one sport.");
+            if (dto.SportsIds == null) throw new Exception("Please, choose at least one sport.");
             if (dto.SportsIds?.Count == 0) throw new Exception("Please, choose at least one sport.");
             List<long> existingSportsIds = user.UserSports.Select(us => us.SportId).ToList();
             List<long> toBeDeletedSportsIds = existingSportsIds.Except(dto.SportsIds).ToList();
@@ -409,6 +446,50 @@ public class UserServices : IUserServices
             user.ImagePath = img;
             await _db.SaveChangesAsync();
             return await GetUserProfile(uId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<bool> ChangePassword(XsportUser user, ChangePasswordDto dto)
+    {
+        try
+        {
+            var result = await userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+            if (!result.Succeeded)
+                throw new Exception(result.Errors.First().Description);
+            return result.Succeeded;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<bool> ChangeEmail(XsportUser user, ChangeEmailDto dto)
+    {
+        try
+        {
+            if (dto.NewEmail == user.Email)
+                throw new Exception("New Email is the same as the old one.");
+            if (dto.NewEmail == user.NewEmail)
+                throw new Exception("You did not change the Email. Please, confirme the email.");
+            XsportUser? xsportUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Email == user.NewEmail);
+            if (xsportUser != null) throw new Exception("Email is already taken.");
+            XsportUser? xsportUserNewEmail = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.NewEmail);
+            if (xsportUserNewEmail != null) throw new Exception("Email is already taken.");
+            XsportUser u = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Id == user.Id) ??
+                throw new Exception("User does not exist.");
+            string confirmationCode = GenerateEmailConfirmationCode();
+            var message = new Message(
+                new List<string>() { dto.NewEmail ?? string.Empty },
+                "Account Confirmation", confirmationCode, null);
+            await emailService.SendEmailAsync(message);
+            u.NewEmail = dto.NewEmail;
+            u.EmailConfirmationCode = confirmationCode;
+            await _db.SaveChangesAsync();
+            return true;
         }
         catch (Exception ex)
         {
@@ -540,6 +621,7 @@ public class UserServices : IUserServices
     {
         try
         {
+            string domainName = httpContextAccessor.HttpContext?.Request.Scheme + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
             var user = await _repositoryManager.UserRepository.FindByConditionWithEagerLoad(false,
                 u => u.Id == uId,
                 u => u.UserSports).FirstAsync();
@@ -556,10 +638,90 @@ public class UserServices : IUserServices
                 PlayersRankingListFilterOptions.ByPlayerName,
                 dto.Name ?? string.Empty,
                 dto.PageInfo.PageNumber,
-                dto.PageInfo.PageSize);
+                dto.PageInfo.PageSize, domainName);
             return players.Where(p => Utils.CalculateDistanceBetweenTowUsers(
                 user.Latitude ?? 0, user.Longitude ?? 0, p.Lat, p.Long)
             <= XsportConstants.SameAreaRaduis).ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<bool> InrollUserInCourse(InrollUserInCourseDto dto)
+    {
+        try
+        {
+            XsportUser user = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Id == dto.UId) ??
+                throw new Exception("User does not exist.");
+            Course course = await _db.Courses.SingleOrDefaultAsync(_ => _.CourseId == dto.CourseId) ??
+                throw new Exception("Course does not exist.");
+            if (!dto.IsPersonal)
+            {
+                if (dto.RelativeId == null || dto.RelativeId == 0)
+                    throw new Exception("Please, Provide valide Relative");
+                Relative relative = await _repositoryManager.RelativeRepository
+                    .FindByCondition(r => r.RelativeId == dto.RelativeId, false)
+                    .SingleOrDefaultAsync() ?? throw new Exception("Relative does not exist.");
+                UserCourse? existentUserCourse = await _repositoryManager.UserCourseRepository
+                    .FindByCondition(
+                    uc => uc.XsportUserId == user.Id &&
+                    uc.CourseId == dto.CourseId &&
+                    uc.RelativeId == dto.RelativeId &&
+                    uc.IsPersonal == false, false)
+                    .SingleOrDefaultAsync();
+                if (existentUserCourse != null) throw new Exception("You are already subscribed to this course.");
+            }
+            else
+            {
+                if (dto.RelativeId != null && dto.RelativeId != 0) throw new Exception("Invalide Inputs.");
+                UserCourse? existentUserCourse = await _repositoryManager.UserCourseRepository
+                    .FindByCondition(
+                    uc => uc.XsportUserId == user.Id &&
+                    uc.CourseId == dto.CourseId &&
+                    uc.IsPersonal == true, false)
+                    .SingleOrDefaultAsync();
+                if (existentUserCourse != null) throw new Exception("You are already subscribed to this course.");
+            }
+            UserCourse userCourse = new UserCourse()
+            {
+                CourseId = dto.CourseId,
+                XsportUserId = user.Id,
+                RelativeId = (dto.RelativeId == 0) ? null : dto.RelativeId,
+                Name = dto.Name,
+                Phone = dto.Phone,
+                ResidencePlace = dto.ResidencePlace,
+                Points = 0,
+                IsPersonal = dto.IsPersonal
+            };
+            await _db.UserCourses.AddAsync(userCourse);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<bool> AddAcademyReview(long uId, AddAcademyReviewDto dto)
+    {
+        try
+        {
+            Academy academy = await _repositoryManager.AcademyRepository
+                .FindByCondition(a => a.AcademyId == dto.AcademyId, false)
+                .SingleOrDefaultAsync() ?? throw new Exception("Academy does not exist.");
+            DateTime reviewDateTime = DateTime.UtcNow;
+            AcademyReview review = new AcademyReview()
+            {
+                AcademyId = dto.AcademyId,
+                XsportUserId = uId,
+                Description = dto.ReviewText,
+                Evaluation = dto.Evaluation,
+                ReviewDateTime = reviewDateTime,
+            };
+            await _repositoryManager.AcademyReviewRepository.CreateAsync(review);
+            await _repositoryManager.AcademyReviewRepository.SaveChangesAsync();
+            return true;
         }
         catch (Exception ex)
         {
@@ -590,25 +752,27 @@ public class UserServices : IUserServices
             if (sports.Count == 0 || sports.Count != sportsIds.Count)
                 throw new Exception("Sports do not exist.");
             var favoriteSportsIds = user.UserSports.Select(us => us.SportId).ToList();
-            var favoriteSportsIdsSet = new HashSet<long>(favoriteSportsIds);
-            var sportsIdsSet = new HashSet<long>(sportsIds);
-            if (favoriteSportsIdsSet.Overlaps(sportsIdsSet))
-                throw new Exception("user already has those sports as favorites!");
             foreach (var sport in sports)
             {
-                var notAssignedValuesIds = sport.SportPreferences.Select(p => p.SportPreferenceValues.SingleOrDefault(v => v.IsNotAssigned ?? false)?.SportPreferenceValueId).ToList();
-                var newUserSport = new UserSport()
+                if (!favoriteSportsIds.Contains(sport.SportId))
                 {
-                    XsportUser = user,
-                    Sport = sport,
-                    IsCurrentState = false,
-                    Points = 0,
-                    UserSportPreferenceValues = notAssignedValuesIds.Select(id => new UserSportPreferenceValue()
+                    var notAssignedValuesIds = sport.SportPreferences
+                        .Select(p =>
+                        p.SportPreferenceValues.SingleOrDefault(v => v.IsNotAssigned ?? false)?.SportPreferenceValueId)
+                        .ToList();
+                    var newUserSport = new UserSport()
                     {
-                        SportPreferenceValueId = id ?? 0
-                    }).ToList()
-                };
-                user.UserSports.Add(newUserSport);
+                        XsportUser = user,
+                        Sport = sport,
+                        IsCurrentState = false,
+                        Points = 0,
+                        UserSportPreferenceValues = notAssignedValuesIds.Select(id => new UserSportPreferenceValue()
+                        {
+                            SportPreferenceValueId = id ?? 0
+                        }).ToList()
+                    };
+                    user.UserSports.Add(newUserSport);
+                }
             }
             await _db.SaveChangesAsync();
         }

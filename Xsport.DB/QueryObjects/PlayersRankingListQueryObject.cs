@@ -8,7 +8,7 @@ namespace Xsport.DB.QueryObjects
     public static class PlayersRankingListQueryObject
     {
         public static IQueryable<PlayersRankingListDto> MapXsportUsersToPlayersRankingListDto(
-            this IQueryable<XsportUser> users, long sportId, short currentLanguageId)
+            this IQueryable<XsportUser> users, long sportId, short currentLanguageId, string domainName)
         {
             try
             {
@@ -23,6 +23,7 @@ namespace Xsport.DB.QueryObjects
                     .LevelTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
                     Lat = u.Latitude ?? 0,
                     Long = u.Longitude ?? 0,
+                    ProfileImgUrl = string.IsNullOrEmpty(u.ImagePath) ? "" : domainName + "/Images/" + u.ImagePath
                 });
             }
             catch (Exception ex)

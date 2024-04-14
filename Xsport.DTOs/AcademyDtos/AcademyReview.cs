@@ -14,6 +14,8 @@ namespace Xsport.DTOs.AcademyDtos
         public string CoverVideo { get; set; } = null!;
         public IEnumerable<string> Photos { get; set; } = null!;
         public IEnumerable<string> Videos { get; set; } = null!;
+        public int NumReviews { get; set; }
+        public double TotalEvaluation { get; set; }
         public IEnumerable<ReviewDto> Reviews { get; set; } = null!;
     }
     public class ReviewDto

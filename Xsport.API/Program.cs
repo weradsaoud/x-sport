@@ -2,7 +2,7 @@
 using AutoWrapper;
 using Xsport.API.Authentication;
 using Xsport.Core;
-using Xsport.Db;
+using Xsport.DB;
 using Asup.Api.AutoWrapperCustomClasses;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xsport.DB.Entities;
@@ -23,9 +23,18 @@ using System.Net;
 using Xsport.Core.SportServices;
 using Xsport.Core.CommonServices;
 using Xsport.Core.AcademyServices;
+using Xsport.Core.StadiumServices;
+using Xsport.Core.MNGServices.StadiumMNGServices;
+using Xsport.Core.MNGServices.ServiceMNGServices;
+using Xsport.Core.MNGServices.AcademyMNGServices;
+using Xsport.Core.MNGServices.AgeCategoryMNGServices;
+using Xsport.Core.MNGServices.CourseMNGServices;
+using Xsport.Core.MNGServices.FloorMNGServices;
+using Xsport.Core.MNGServices.RelativeMNGServices;
+using Xsport.Core.MNGServices.GenderMNGServices;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("AWSConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);
@@ -130,9 +139,19 @@ builder.Services.AddScoped<ISportServices, SportServices>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<ICommonServices, CommonServices>();
 builder.Services.AddScoped<IAcademyServices, AcademyServices>();
+builder.Services.AddScoped<IStadiumServices, StadiumServices>();
+builder.Services.AddScoped<IStadiumMNGService, StadiumMNGService>();
+builder.Services.AddScoped<IServiceMNGService, ServiceMNGService>();
+builder.Services.AddScoped<IAcademyMNGService, AcademyMNGService>();
+builder.Services.AddScoped<IAgeCategoryMNGService, AgeCategoryMNGService>();
+builder.Services.AddScoped<ICourseMNGService, CourseMNGService>();
+builder.Services.AddScoped<IFloorMNGService, FloorMNGService>();
+builder.Services.AddScoped<IRelativeMNGService, RelativeMNGService>();
+builder.Services.AddScoped<IGenderMNGService, GenderMNGService>();
 
 
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", 
+    Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
 builder.Services.AddSingleton(FirebaseApp.Create());
 
 var app = builder.Build();
@@ -164,10 +183,10 @@ app.UseCors(x => x
 
 app.UseStaticFiles();
 //if (app.Environment.IsDevelopment())
-    //{
-    //    app.UseSwagger();
-    //    app.UseSwaggerUI();
-    //}
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
 app.UseSwagger();
 app.UseSwaggerUI();
 //app.UseHttpsRedirection();

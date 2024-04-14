@@ -16,7 +16,7 @@ namespace Xsport.DB.RepositoryInterfaces
             short currentLanguageId,
             PlayersRankingListOrderOptions orderOption,
             PlayersRankingListFilterOptions filterOption, string filterValue,
-            int pageNumZeroStart, int pageSize);
+            int pageNumZeroStart, int pageSize, string domainName);
 
 
     }

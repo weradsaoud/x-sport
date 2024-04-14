@@ -15,6 +15,8 @@ public class Language
     public ICollection<WorkingDayTranslation> WorkingDayTranslations { get; set; } = null!;
     public ICollection<RelativeTranslation> RelativeTranslations { get; set; } = null!;
     public ICollection<ServiceTranslation> ServiceTranslations { get; set; } = null!;
-    public ICollection<ServiceValueTranslation> ServiceValueTranslations { get; set; } = null!;
     public ICollection<CourseTranslation> CourseTranslations { get; set; } = null!;
+    public ICollection<StadiumTranslation> StadiumTranslations { get; set; } = null!;
+    public ICollection<FloorTranslation> FloorTranslations { get; set; } = null!;
+    public ICollection<GenderTranslation> GenderTranslations { get; set; } = null!;
 }

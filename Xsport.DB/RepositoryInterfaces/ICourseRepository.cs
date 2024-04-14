@@ -7,7 +7,7 @@ using Xsport.DB.Entities;
 
 namespace Xsport.DB.RepositoryInterfaces
 {
-    internal interface ICourseRepository: IRepositoryBase<Course>
+    public interface ICourseRepository: IRepositoryBase<Course>
     {
 
     }

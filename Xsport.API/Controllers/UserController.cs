@@ -170,6 +170,48 @@ public class UserController : BaseController
 
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<bool> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                return await _userServices.ChangePassword(LoggedInUser ,dto);
+            }
+            catch(Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<bool> ChangeEmail([FromBody] ChangeEmailDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
+                return await _userServices.ChangeEmail(LoggedInUser, dto);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide Inputs", 500);
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpDelete]
     public async Task<bool> DeleteAccount()
     {
@@ -272,7 +314,7 @@ public class UserController : BaseController
         }
     }
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [HttpGet]
+    [HttpPost]
     public async Task<List<PlayersRankingListDto>> GetPlayers([FromQuery] GetPlayersReqDto dto)
     {
         if (ModelState.IsValid)
@@ -281,6 +323,49 @@ public class UserController : BaseController
             {
                 if (LoggedInUser == null) throw new ApiException("You are not logged in.");
                 return await _userServices.GetPlayers(LoggedInUser.Id, dto, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide inputs.");
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<bool> InrollUserInCourse(InrollUserInCourseDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in.");
+                if (dto.UId == null || dto.UId == 0) dto.UId = LoggedInUser.Id;
+                return await _userServices.InrollUserInCourse(dto);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalide inputs.");
+        }
+    }
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<bool> AddAcademyReview(AddAcademyReviewDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException("You are not logged in.");
+                return await _userServices.AddAcademyReview(LoggedInUser.Id, dto);
             }
             catch (Exception ex)
             {

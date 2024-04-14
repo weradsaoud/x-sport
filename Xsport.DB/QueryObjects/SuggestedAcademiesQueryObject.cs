@@ -1,4 +1,5 @@
-﻿using Xsport.Common.Enums;
+﻿using Xsport.Common.Constants;
+using Xsport.Common.Enums;
 using Xsport.DB.Entities;
 using Xsport.DTOs.AcademyDtos;
 
@@ -7,7 +8,7 @@ namespace Xsport.DB.QueryObjects
     public static class SuggestedAcademiesQueryObject
     {
         public static IQueryable<SuggestedAcademyDto> MapAcademiesToSuggested(
-            this IQueryable<Academy> academies, short currentLanguageId)
+            this IQueryable<Academy> academies, short currentLanguageId, string domainName)
         {
             try
             {
@@ -20,19 +21,37 @@ namespace Xsport.DB.QueryObjects
                     .Single(t => t.LanguageId == currentLanguageId).Description,
                     Lat = academy.Lattitude,
                     Long = academy.Longitude,
-                    OpenTime = academy.OpenAt,
-                    CloseTime = academy.CloseAt,
+                    OpenTime = academy.AcademyWorkingDays
+                    .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
+                    .OpenAt.ToString(XsportConstants.TimeOnlyFormat),
+                    CloseTime = academy.AcademyWorkingDays
+                    .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
+                    .CloseAt.ToString(XsportConstants.TimeOnlyFormat),
                     MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
                     NumReviews = academy.AcademyReviews.Count,
-                    Evaluation = academy.AcademyReviews.Average(r => r.Evaluation),
-                    CoverPhoto = academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
-                    CoverVideo = academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
+                    Evaluation = (academy.AcademyReviews.Count == 0) ?
+                    0 :
+                    academy.AcademyReviews.Select(r => r.Evaluation).Average(),
+                    CoverPhoto = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath) ? ""
+                    : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
+                    CoverVideo = string.IsNullOrEmpty(academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath) ? ""
+                    : domainName + "/Images/" + academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
                     Photos = academy.Mutimedias
                     .Where(m => !m.IsVideo && !m.IsCover)
-                    .Select(m => m.FilePath).ToList(),
+                    .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
                     Videos = academy.Mutimedias
                     .Where(m => m.IsVideo && !m.IsCover)
-                    .Select(m => m.FilePath).ToList(),
+                    .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
+                    AgeCategoriesDropdownItems = academy.AgeCategorys.Select(ac => new DTOs.DropDownDto()
+                    {
+                        Id = ac.AgeCategoryId,
+                        Name = ac.AgeCategoryTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        Info = new DTOs.AdditionalInfo()
+                        {
+                            From = ac.FromAge,
+                            To = ac.ToAge,
+                        }
+                    }).ToList(),
                 });
             }
             catch (Exception ex)
