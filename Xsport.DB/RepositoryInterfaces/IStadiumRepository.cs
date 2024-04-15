@@ -9,6 +9,6 @@ namespace Xsport.DB.RepositoryInterfaces
 {
     public interface IStadiumRepository: IRepositoryBase<Stadium>
     {
-        public IQueryable<Stadium> GetBySportId(long sportId);
+
     }
 }

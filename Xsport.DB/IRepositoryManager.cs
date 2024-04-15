@@ -28,5 +28,7 @@ namespace Xsport.DB
         IRelativeRepository RelativeRepository { get; }
         IUserCourseRepository UserCourseRepository { get; }
         IGenderRepository GenderRepository { get; }
+        IStadiumFloorRepository StadiumFloorRepository { get; }
+        IReservationRepository ReservationRepository { get; }
     }
 }

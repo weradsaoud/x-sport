@@ -11,7 +11,7 @@ namespace Xsport.DTOs.StadiumDtos
         public long StadiumId { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
-        public string StadiumType { get; set; } = null!;
+        public List<DropDownDto> Floors { get; set; } = null!;
         public string RegionName { get; set; } = "تضاف لاحقا";
         public decimal Price { get; set; }
         public string OpenAt { get; set; } = null!;

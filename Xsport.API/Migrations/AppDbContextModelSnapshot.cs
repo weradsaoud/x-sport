@@ -441,7 +441,15 @@ namespace Xsport.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("FloorId"));
 
+                    b.Property<int>("NumPlayers")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("SportId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("FloorId");
+
+                    b.HasIndex("SportId");
 
                     b.ToTable("Floors");
                 });
@@ -715,6 +723,41 @@ namespace Xsport.API.Migrations
                     b.ToTable("RelativeTranslations");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Reservation", b =>
+                {
+                    b.Property<long>("ReservationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ReservationId"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly>("From")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<long>("StadiumFloorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<TimeOnly>("To")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<long>("XsportUserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("ReservationId");
+
+                    b.HasIndex("StadiumFloorId");
+
+                    b.HasIndex("XsportUserId");
+
+                    b.ToTable("Reservations");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.Service", b =>
                 {
                     b.Property<long>("ServiceId")
@@ -932,9 +975,6 @@ namespace Xsport.API.Migrations
                     b.Property<long?>("AcademyId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("FloorId")
-                        .HasColumnType("bigint");
-
                     b.Property<decimal>("Latitude")
                         .HasColumnType("numeric");
 
@@ -944,18 +984,34 @@ namespace Xsport.API.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.Property<long>("SportId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("StadiumId");
 
                     b.HasIndex("AcademyId");
 
+                    b.ToTable("Stadiums");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>
+                {
+                    b.Property<long>("StadiumFloorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("StadiumFloorId"));
+
+                    b.Property<long>("FloorId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("StadiumId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("StadiumFloorId");
+
                     b.HasIndex("FloorId");
 
-                    b.HasIndex("SportId");
+                    b.HasIndex("StadiumId");
 
-                    b.ToTable("Stadiums");
+                    b.ToTable("StadiumFloors");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumReview", b =>
@@ -1636,6 +1692,17 @@ namespace Xsport.API.Migrations
                     b.Navigation("WorkingDay");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Floor", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.Sport", "Sport")
+                        .WithMany("Floors")
+                        .HasForeignKey("SportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sport");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.FloorTranslation", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.Floor", "Floor")
@@ -1760,6 +1827,25 @@ namespace Xsport.API.Migrations
                     b.Navigation("Relative");
                 });
 
+            modelBuilder.Entity("Xsport.DB.Entities.Reservation", b =>
+                {
+                    b.HasOne("Xsport.DB.Entities.StadiumFloor", "StadiumFloor")
+                        .WithMany("Reservations")
+                        .HasForeignKey("StadiumFloorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Xsport.DB.Entities.XsportUser", "User")
+                        .WithMany("Reservations")
+                        .HasForeignKey("XsportUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StadiumFloor");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Xsport.DB.Entities.ServiceTranslation", b =>
                 {
                     b.HasOne("Xsport.DB.Entities.Language", "Language")
@@ -1864,23 +1950,26 @@ namespace Xsport.API.Migrations
                         .WithMany("Stadiums")
                         .HasForeignKey("AcademyId");
 
+                    b.Navigation("Academy");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>
+                {
                     b.HasOne("Xsport.DB.Entities.Floor", "Floor")
-                        .WithMany("Stadiums")
+                        .WithMany("StadiumFloors")
                         .HasForeignKey("FloorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Xsport.DB.Entities.Sport", "Sport")
-                        .WithMany("Stadiums")
-                        .HasForeignKey("SportId")
+                    b.HasOne("Xsport.DB.Entities.Stadium", "Stadium")
+                        .WithMany("StadiumFloors")
+                        .HasForeignKey("StadiumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Academy");
-
                     b.Navigation("Floor");
 
-                    b.Navigation("Sport");
+                    b.Navigation("Stadium");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumReview", b =>
@@ -2129,7 +2218,7 @@ namespace Xsport.API.Migrations
                 {
                     b.Navigation("FloorTranslations");
 
-                    b.Navigation("Stadiums");
+                    b.Navigation("StadiumFloors");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.Gender", b =>
@@ -2200,6 +2289,8 @@ namespace Xsport.API.Migrations
                 {
                     b.Navigation("Courses");
 
+                    b.Navigation("Floors");
+
                     b.Navigation("Levels");
 
                     b.Navigation("Matches");
@@ -2207,8 +2298,6 @@ namespace Xsport.API.Migrations
                     b.Navigation("SportPreferences");
 
                     b.Navigation("SportTranslations");
-
-                    b.Navigation("Stadiums");
 
                     b.Navigation("UserRoles");
                 });
@@ -2231,6 +2320,8 @@ namespace Xsport.API.Migrations
                 {
                     b.Navigation("Mutimedias");
 
+                    b.Navigation("StadiumFloors");
+
                     b.Navigation("StadiumReviews");
 
                     b.Navigation("StadiumServices");
@@ -2238,6 +2329,11 @@ namespace Xsport.API.Migrations
                     b.Navigation("StadiumTranslations");
 
                     b.Navigation("StadiumWorkingDays");
+                });
+
+            modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.UserSport", b =>
@@ -2264,6 +2360,8 @@ namespace Xsport.API.Migrations
             modelBuilder.Entity("Xsport.DB.Entities.XsportUser", b =>
                 {
                     b.Navigation("AcademyReviews");
+
+                    b.Navigation("Reservations");
 
                     b.Navigation("StadiumReviews");
 

@@ -15,10 +15,5 @@ namespace Xsport.DB.Repositories
         {
 
         }
-
-        public IQueryable<Stadium> GetBySportId(long sportId)
-        {
-            return _db.Stadiums.Where(s => s.SportId == sportId);
-        }
     }
 }

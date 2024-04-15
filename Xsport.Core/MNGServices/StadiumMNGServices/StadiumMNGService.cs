@@ -29,15 +29,9 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
         {
             try
             {
-                Sport? sport = await _repManager.SportRepository
-                    .FindByCondition(s => s.SportId == dto.SportId, false)
-                    .SingleOrDefaultAsync() ?? throw new Exception("Sport does not exist.");
                 Academy? academy = dto.AcademyId.HasValue ? await _repManager.AcademyRepository
                     .FindByCondition(a => a.AcademyId == dto.AcademyId, false)
                     .SingleOrDefaultAsync() ?? throw new Exception("Academy does not exist.") : null;
-                Floor floor = await _repManager.FloorRepository
-                    .FindByCondition(f => f.FloorId == dto.FloorId, false)
-                    .SingleOrDefaultAsync() ?? throw new Exception("Floor does not exist.");
                 Stadium stadium = new Stadium()
                 {
                     StadiumTranslations = new List<StadiumTranslation>()
@@ -55,11 +49,7 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                         Description = dto.EnDescription,
                     }
                 },
-                    SportId = dto.SportId,
-                    //Sport = sport,
                     AcademyId = dto.AcademyId,
-                    //Academy = academy,
-                    FloorId = dto.FloorId,
                     Latitude = dto.Lat,
                     Longitude = dto.Long,
                     Price = dto.Price
@@ -142,7 +132,7 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
             {
                 Stadium? stadium = await _repManager.StadiumRepository
                     .FindByCondition(s => s.StadiumId == dto.StadiumId, false)
-                    .SingleOrDefaultAsync()??throw new Exception("Stadium does not exist.");
+                    .SingleOrDefaultAsync() ?? throw new Exception("Stadium does not exist.");
                 foreach (var serviceId in dto.ServicesIds)
                 {
                     Service? service = await _repManager.ServiceRepository
@@ -150,11 +140,35 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                         .SingleOrDefaultAsync() ?? throw new Exception("Service does not exist.");
                     await _repManager.StadiumServiceRepository.CreateAsync(new StadiumService
                     {
-                        StadiumId= dto.StadiumId,
-                        ServiceId= serviceId,
+                        StadiumId = dto.StadiumId,
+                        ServiceId = serviceId,
                     });
                 }
                 await _repManager.StadiumServiceRepository.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public async Task<bool> AddStadiumFloor(StadiumFloorDto dto)
+        {
+            try
+            {
+                Stadium? stadium = await _repManager.StadiumRepository
+                    .FindByCondition(s => s.StadiumId == dto.StadiumId, false)
+                    .SingleOrDefaultAsync() ?? throw new Exception("Stadium does not exist.");
+                Floor? floor = await _repManager.FloorRepository
+                    .FindByCondition(f => f.FloorId == dto.FloorId, false)
+                    .SingleOrDefaultAsync() ?? throw new Exception("Stadium does not exist.");
+                StadiumFloor stadiumFloor = new StadiumFloor()
+                {
+                    StadiumId = dto.StadiumId,
+                    FloorId = floor.FloorId,
+                };
+                await _repManager.StadiumFloorRepository.CreateAsync(stadiumFloor);
+                await _repManager.StadiumFloorRepository.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)

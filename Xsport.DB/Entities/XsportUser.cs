@@ -23,4 +23,5 @@ public class XsportUser : IdentityUser<long>
     public ICollection<UserCourse> UserCourses { get; set; } = null!;
     public ICollection<AcademyReview> AcademyReviews { get; set; } = null!;
     public ICollection<StadiumReview> StadiumReviews { get; set; } = null!;
+    public ICollection<Reservation> Reservations { get; set; } = null!;
 }

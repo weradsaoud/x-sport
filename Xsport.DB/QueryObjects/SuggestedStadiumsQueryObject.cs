@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xsport.Common.Enums;
 using Xsport.DB.Entities;
+using Xsport.DTOs;
 using Xsport.DTOs.StadiumDtos;
 
 namespace Xsport.DB.QueryObjects
@@ -13,7 +14,7 @@ namespace Xsport.DB.QueryObjects
     public static class SuggestedStadiumsQueryObject
     {
         public static IQueryable<SuggestedStadiumDto> MapStadiumToSuggested(
-            this IQueryable<Stadium> stadiums, short currentLanguageId, string domainName)
+            this IQueryable<Stadium> stadiums, short currentLanguageId, string domainName, long? sportId)
         {
             try
             {
@@ -21,8 +22,16 @@ namespace Xsport.DB.QueryObjects
                 {
                     StadiumId = stadium.StadiumId,
                     StadiumName = stadium.StadiumTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
-                    StadiumType = stadium.Floor.FloorTranslations
-                    .Single(t => t.LanguageId == currentLanguageId).Name,
+                    Floors = stadium.StadiumFloors
+                    .Where(sf => (sportId == null) ? true : sf.Floor.SportId == sportId)
+                    .Select(sf => new SuggestedStadiumFloorDto()
+                    {
+                        FloorId = sf.StadiumFloorId,
+                        SportId = sf.Floor.SportId,
+                        FloorName = sf.Floor.FloorTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        SportName = sf.Floor.Sport.SportTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        NumPlayers = sf.Floor.NumPlayers
+                    }).ToList(),
                     NumOfReviews = stadium.StadiumReviews.Count(),
                     Evaluation = stadium.StadiumReviews.Count() > 0 ?
                     stadium.StadiumReviews.Select(r => r.Evaluation).Average() : 0,
@@ -108,6 +117,11 @@ namespace Xsport.DB.QueryObjects
                     case SuggestedStadiumsFilterOptions.NumOfReviews:
                         int numRev = int.Parse(filterValue);
                         return stadiums.Where(s => s.NumOfReviews <= numRev);
+                    case SuggestedStadiumsFilterOptions.SportId:
+                        long sportId = long.Parse(filterValue);
+                        return stadiums.Where(s => s.Floors.Select(f => f.SportId).Contains(sportId));
+                    case SuggestedStadiumsFilterOptions.ByStadiumName:
+                        return stadiums.Where(s => s.StadiumName.ToLower().Contains(filterValue.ToLower()));
                     default:
                         throw new ArgumentOutOfRangeException(
                         nameof(filterOption), filterOption, null);

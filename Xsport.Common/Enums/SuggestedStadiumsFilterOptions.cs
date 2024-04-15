@@ -15,6 +15,8 @@ namespace Xsport.Common.Enums
         ByEvaluation = 4,
         NumOfReviewsUp = 5,
         NumOfReviewsDown = 6,
-        NumOfReviews = 7
+        NumOfReviews = 7,
+        SportId = 8,
+        ByStadiumName = 9,
     }
 }

@@ -19,5 +19,5 @@ public class Sport
     public ICollection<SportPreference> SportPreferences { get; set; } = null!;
     public ICollection<Level> Levels { get; set; } = null!;
     public ICollection<Course> Courses { get; set; } = null!;
-    public ICollection<Stadium> Stadiums { get; set; } = null!;
+    public ICollection<Floor> Floors { get; set; } = null!;
 }

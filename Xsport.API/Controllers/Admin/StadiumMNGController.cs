@@ -74,5 +74,24 @@ namespace Xsport.API.Controllers.Admin
                 throw new ApiException("Invalid Input.", 500);
             }
         }
+        [HttpPost]
+        public async Task<bool> AddStadiumFloor([FromBody] StadiumFloorDto dto)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    return await _stadiumMNGService.AddStadiumFloor(dto);
+                }
+                catch (Exception ex)
+                {
+                    throw new ApiException(ex.Message, 500);
+                }
+            }
+            else
+            {
+                throw new ApiException("Invalid Input.", 500);
+            }
+        }
     }
 }
