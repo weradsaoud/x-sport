@@ -25,19 +25,21 @@ namespace Xsport.Core.MNGServices.FloorMNGServices
             {
                 Floor floor = new Floor()
                 {
+                    SportId = dto.SportId,
+                    NumPlayers = dto.NumPlayers,
                     FloorTranslations = new List<FloorTranslation>()
-                {
-                    new FloorTranslation()
                     {
-                        LanguageId = (long)LanguagesEnum.Arabic,
-                        Name = dto.ArName,
-                    },
-                    new FloorTranslation()
-                    {
-                        LanguageId = (long)LanguagesEnum.English,
-                        Name = dto.EnName,
+                        new FloorTranslation()
+                        {
+                            LanguageId = (long)LanguagesEnum.Arabic,
+                            Name = dto.ArName,
+                        },
+                        new FloorTranslation()
+                        {
+                            LanguageId = (long)LanguagesEnum.English,
+                            Name = dto.EnName,
+                        }
                     }
-                }
                 };
                 await _repManager.FloorRepository.CreateAsync(floor);
                 await _repManager.FloorRepository.SaveChangesAsync();

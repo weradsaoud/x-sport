@@ -41,6 +41,8 @@ namespace Xsport.DB
         IRelativeRepository _relativeRepository;
         IUserCourseRepository _userCourseRepository;
         IGenderRepository _genderRepository;
+        IStadiumFloorRepository _stadiumFloorRepository;
+        IReservationRepository _reservationRepository;
         public IUserRepository UserRepository
         {
             get
@@ -57,11 +59,11 @@ namespace Xsport.DB
                 return _academyRepository;
             }
         }
-        public ISportRepository SportRepository 
-        { 
+        public ISportRepository SportRepository
+        {
             get
             {
-                _sportRepository??= new SportRepository(db);
+                _sportRepository ??= new SportRepository(db);
                 return _sportRepository;
             }
         }
@@ -77,7 +79,7 @@ namespace Xsport.DB
         {
             get
             {
-                _mutimediaRepository??= new MutimediaRepository(db);
+                _mutimediaRepository ??= new MutimediaRepository(db);
                 return _mutimediaRepository;
             }
         }
@@ -161,7 +163,7 @@ namespace Xsport.DB
                 return _floorRepository;
             }
         }
-        public IRelativeRepository RelativeRepository 
+        public IRelativeRepository RelativeRepository
         {
             get
             {
@@ -183,6 +185,22 @@ namespace Xsport.DB
             {
                 _genderRepository ??= new GenderRepository(db);
                 return _genderRepository;
+            }
+        }
+        public IStadiumFloorRepository StadiumFloorRepository
+        {
+            get
+            {
+                _stadiumFloorRepository ??= new StadiumFloorRepository(db);
+                return _stadiumFloorRepository;
+            }
+        }
+        public IReservationRepository ReservationRepository
+        {
+            get
+            {
+                _reservationRepository ??= new ReservationRepository(db);
+                return _reservationRepository;
             }
         }
         public void Dispose() => _db.Dispose();

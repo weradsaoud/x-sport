@@ -54,7 +54,8 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<FloorTranslation> FloorTranslations { get; set; }
     public DbSet<Gender> Genders { get; set; }
     public DbSet<GenderTranslation> GenderTranslations { get; set; }
-
+    public DbSet<StadiumFloor> StadiumFloors { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

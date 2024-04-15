@@ -11,6 +11,9 @@ namespace Xsport.DTOs.FloorDtos.MNGDtos
     {
         public long? Id { get; set; }
         [Required]
+        public long SportId { get; set; }
+        public int NumPlayers { get; set; }
+        [Required]
         [MaxLength(50)]
         public string ArName { get; set; } = null!;
         [Required]

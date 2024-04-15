@@ -12,6 +12,7 @@ using Xsport.Common.Utils;
 using Xsport.DB;
 using Xsport.DB.Entities;
 using Xsport.DB.QueryObjects;
+using Xsport.DTOs;
 using Xsport.DTOs.StadiumDtos;
 using StadiumService = Xsport.DTOs.StadiumDtos.StadiumService;
 
@@ -34,8 +35,9 @@ namespace Xsport.Core.StadiumServices
             {
                 string domainName = httpContextAccessor.HttpContext?.Request.Scheme
                     + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
-                return await _repManager.StadiumRepository.GetBySportId(sportId)
-                    .MapStadiumToSuggested(currentLanguageId, domainName)
+                return await _repManager.StadiumRepository.FindAll(false)
+                    .MapStadiumToSuggested(currentLanguageId, domainName, sportId)
+                    .FilterSuggestedStadiums(SuggestedStadiumsFilterOptions.SportId, sportId.ToString())
                     .OrderSuggestedStadiums(SuggestedStadiumsOrderOptions.EvaluationDown)
                     .Page<SuggestedStadiumDto>(pageNum, pageSize).ToListAsync();
             }
@@ -54,8 +56,9 @@ namespace Xsport.Core.StadiumServices
                     + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
                 XsportUser user = await _repManager.UserRepository.FindByCondition(u => u.Id == uId, false)
                     .SingleOrDefaultAsync() ?? throw new Exception("User does not exist.");
-                var stadiums = await _repManager.StadiumRepository.GetBySportId(sportId)
-                    .MapStadiumToSuggested(currentLanguageId, domainName)
+                var stadiums = await _repManager.StadiumRepository.FindAll(false)
+                    .MapStadiumToSuggested(currentLanguageId, domainName, sportId)
+                    .FilterSuggestedStadiums(SuggestedStadiumsFilterOptions.SportId, sportId.ToString())
                     .OrderSuggestedStadiums(SuggestedStadiumsOrderOptions.EvaluationDown)
                     .ToListAsync();
                 return stadiums.Where(s => Utils.CalculateDistanceBetweenTowUsers(
@@ -80,7 +83,11 @@ namespace Xsport.Core.StadiumServices
                         StadiumId = s.StadiumId,
                         Name = s.StadiumTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
                         Description = s.StadiumTranslations.Single(t => t.LanguageId == currentLanguageId).Description,
-                        StadiumType = s.Floor.FloorTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        Floors = s.StadiumFloors.Select(sf => new DropDownDto()
+                        {
+                            Id = sf.FloorId,
+                            Name = sf.Floor.FloorTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        }).ToList(),
                         Price = s.Price,
                         OpenAt = s.StadiumWorkingDays
                         .Single(wd => wd.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)

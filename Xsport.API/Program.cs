@@ -32,6 +32,7 @@ using Xsport.Core.MNGServices.CourseMNGServices;
 using Xsport.Core.MNGServices.FloorMNGServices;
 using Xsport.Core.MNGServices.RelativeMNGServices;
 using Xsport.Core.MNGServices.GenderMNGServices;
+using Xsport.Core.ReservationServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -148,6 +149,7 @@ builder.Services.AddScoped<ICourseMNGService, CourseMNGService>();
 builder.Services.AddScoped<IFloorMNGService, FloorMNGService>();
 builder.Services.AddScoped<IRelativeMNGService, RelativeMNGService>();
 builder.Services.AddScoped<IGenderMNGService, GenderMNGService>();
+builder.Services.AddScoped<IReservationSrvice, ReservationService>();
 
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", 

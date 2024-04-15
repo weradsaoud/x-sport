@@ -14,5 +14,6 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
         public Task<long> CreateStadium(StadiumDto dto);
         public Task<bool> AddStadiumMultimedia(StadiumMultimediaDto dto);
         public Task<bool> AddStadiumServices(StadiumServicesDto dto);
+        public Task<bool> AddStadiumFloor(StadiumFloorDto dto);
     }
 }
