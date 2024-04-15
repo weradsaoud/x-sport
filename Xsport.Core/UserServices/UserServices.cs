@@ -106,7 +106,30 @@ public class UserServices : IUserServices
                 throw new Exception("Confirmation email could not be sent. " +
                     "Please, make sure you entered a valide email address");
             }
+            //AuthResult jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
             return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<short> AccountStatus(AccountStatusDto dto)
+    {
+        try
+        {
+            XsportUser user = await _db.XsportUsers
+                .Where(u => u.Email == dto.Email)
+                .Include(u => u.UserSports)
+                .SingleOrDefaultAsync() ?? throw new Exception("User does not exist.");
+            if (user.EmailConfirmed && user.UserSports.Any())
+                return (short)AccountStatusEnum.Ready;
+            if (user.EmailConfirmed && !user.UserSports.Any())
+                return (short)AccountStatusEnum.ConfirmedButNoFavSports;
+            if (!user.EmailConfirmed)
+                return (short)AccountStatusEnum.NotConfirmed;
+            return (short)AccountStatusEnum.Unknown;
+
         }
         catch (Exception ex)
         {
@@ -121,7 +144,7 @@ public class UserServices : IUserServices
             string code = string.Empty;
             if (oldEmailUser == null)
             {
-                var newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email)??
+                var newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email) ??
                     throw new Exception("User does not exist.");
                 code = await SendActivationCode(dto.Email);
                 if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
@@ -156,6 +179,7 @@ public class UserServices : IUserServices
                 if (newEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
                 newEmailUser.Email = newEmailUser.NewEmail;
                 newEmailUser.NormalizedEmail = newEmailUser.NewEmail?.ToUpperInvariant();
+                newEmailUser.UserName = newEmailUser.Email;
                 newEmailUser.NormalizedUserName = newEmailUser.NewEmail?.ToUpperInvariant();
                 newEmailUser.NewEmail = null;
                 await _db.SaveChangesAsync();

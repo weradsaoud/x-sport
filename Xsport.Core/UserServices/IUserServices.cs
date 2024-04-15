@@ -1,12 +1,15 @@
 
 using Microsoft.AspNetCore.Mvc;
+using Xsport.Common.Models;
 using Xsport.DB.Entities;
 using Xsport.DTOs.UserDtos;
+
 
 namespace Xsport.Core;
 public interface IUserServices
 {
     public Task<bool> Register(UserRegistrationDto user, short currentLanguageId);
+    public Task<short> AccountStatus(AccountStatusDto dto);
     public Task<ConfirmUserEmailRespDto> ConfirmUserEmail(ConfirmEmailDto dto, short currentLanguageId);
     public Task<LoginResponseDto> LoginAsync(UserLoginRequest user, short currentLanguageId);
     public Task<LoginResponseDto> GoogleLoginAsync(UserGoogleLoginDto dto, short currentLanguageId);

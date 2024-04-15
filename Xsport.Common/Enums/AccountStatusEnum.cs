@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Xsport.Common.Enums
 {
-    public enum GenderEnum : short
+    public enum AccountStatusEnum : short
     {
-        Male = 1,
-        Female = 2,
-        Mixed = 3,
+        Unknown = 0,
+        Ready = 1,
+        ConfirmedButNoFavSports = 2,
+        NotConfirmed = 3,
     }
 }
