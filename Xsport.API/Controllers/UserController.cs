@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Xsport.Common.Models;
 using Xsport.Core;
 using Xsport.DTOs.UserDtos;
 
@@ -28,6 +29,25 @@ public class UserController : BaseController
             try
             {
                 return await _userServices.Register(user, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException("Invalid Inputs", 500);
+        }
+    }
+    [HttpPost]
+    public async Task<short> AccountStatus([FromBody] AccountStatusDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                return await _userServices.AccountStatus(dto);
             }
             catch (Exception ex)
             {
@@ -178,9 +198,9 @@ public class UserController : BaseController
             try
             {
                 if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
-                return await _userServices.ChangePassword(LoggedInUser ,dto);
+                return await _userServices.ChangePassword(LoggedInUser, dto);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ApiException(ex.Message, 500);
             }
