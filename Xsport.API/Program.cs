@@ -33,6 +33,8 @@ using Xsport.Core.MNGServices.FloorMNGServices;
 using Xsport.Core.MNGServices.RelativeMNGServices;
 using Xsport.Core.MNGServices.GenderMNGServices;
 using Xsport.Core.ReservationServices;
+using Microsoft.AspNetCore.Server.Kestrel;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -94,6 +96,15 @@ builder.Services.AddHttpsRedirection(options =>
 {
     options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
     options.HttpsPort = 443; // Default HTTPS port
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Listen(IPAddress.Loopback,5000, listenOptions =>
+    {
+        listenOptions.UseHttps("./cert.pfx", "XsportCert@");
+    });
+
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
