@@ -16,6 +16,7 @@ namespace Xsport.DTOs.AcademyDtos
         public string CourseEndDate { get; set; } = null!;
         public string KinShip { get; set; } = null!;
         public int SubscriberPoints { get; set; }
+        public string Sport { get; set; } = null!;
         public string CoverPhoto { get; set; } = null!;
         public string CoverVideo { get; set; } = null!;
         public List<string> Photos { get; set; } = null!;

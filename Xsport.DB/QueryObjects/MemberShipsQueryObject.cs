@@ -25,28 +25,29 @@ namespace Xsport.DB.QueryObjects
                     {
                         AcademyId = uc.Course.AcademyId,
                         AcademyName = uc.Course.Academy.AcademyTranslations
-                    .Single(t => t.LanguageId == currentLanguageId).Name,
+                        .Single(t => t.LanguageId == currentLanguageId).Name,
                         CourseId = uc.Course.CourseId,
                         CourseName = uc.Course.CourseTranslations
-                    .Single(t => t.LanguageId == currentLanguageId).Name,
+                        .Single(t => t.LanguageId == currentLanguageId).Name,
                         CourseStartDate = uc.Course.StartDate.ToString(XsportConstants.DateOnlyFormat),
                         CourseEndDate = uc.Course.EndDate.ToString(XsportConstants.DateOnlyFormat),
                         KinShip = uc.IsPersonal ?
-                    (currentLanguageId == (long)LanguagesEnum.English ? "You" : "أنت") :
-                    uc.Relative.RelativeTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        (currentLanguageId == (long)LanguagesEnum.English ? "You" : "أنت") :
+                        uc.Relative.RelativeTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
                         SubscriberPoints = uc.Points,
+                        Sport = uc.Course.Sport.SportTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
                         CoverPhoto = string.IsNullOrEmpty(
                         uc.Course.Academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath) ? ""
-                    : domainName + "/Images/" + uc.Course.Academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
+                        : domainName + "/Images/" + uc.Course.Academy.Mutimedias.Single(m => m.IsCover && !m.IsVideo).FilePath,
                         CoverVideo = string.IsNullOrEmpty(
                         uc.Course.Academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath) ? ""
-                    : domainName + "/Images/" + uc.Course.Academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
+                        : domainName + "/Images/" + uc.Course.Academy.Mutimedias.Single(m => m.IsCover && m.IsVideo).FilePath,
                         Photos = uc.Course.Academy.Mutimedias
-                    .Where(m => !m.IsVideo && !m.IsCover)
-                    .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
+                        .Where(m => !m.IsVideo && !m.IsCover)
+                        .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
                         Videos = uc.Course.Academy.Mutimedias
-                    .Where(m => m.IsVideo && !m.IsCover)
-                    .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
+                        .Where(m => m.IsVideo && !m.IsCover)
+                        .Select(m => string.IsNullOrEmpty(m.FilePath) ? "" : domainName + "/Images/" + m.FilePath).ToList(),
                     });
             }
             catch (Exception ex)

@@ -35,6 +35,7 @@ using Xsport.Core.MNGServices.GenderMNGServices;
 using Xsport.Core.ReservationServices;
 using Microsoft.AspNetCore.Server.Kestrel;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Xsport.Core.ArchiveServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -161,6 +162,7 @@ builder.Services.AddScoped<IFloorMNGService, FloorMNGService>();
 builder.Services.AddScoped<IRelativeMNGService, RelativeMNGService>();
 builder.Services.AddScoped<IGenderMNGService, GenderMNGService>();
 builder.Services.AddScoped<IReservationSrvice, ReservationService>();
+builder.Services.AddScoped<IArchiveServices, ArchiveServices>();
 
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", 
