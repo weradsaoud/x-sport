@@ -93,20 +93,20 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
-    options.HttpsPort = 443; // Default HTTPS port
-});
+//builder.Services.AddHttpsRedirection(options =>
+//{
+//    options.RedirectStatusCode = (int)HttpStatusCode.PermanentRedirect;
+//    options.HttpsPort = 443; // Default HTTPS port
+//});
 
-builder.Services.Configure<KestrelServerOptions>(options =>
-{
-    options.Listen(IPAddress.Loopback,5000, listenOptions =>
-    {
-        listenOptions.UseHttps("./cert.pfx", "XsportCert@");
-    });
+//builder.Services.Configure<KestrelServerOptions>(options =>
+//{
+//    options.Listen(IPAddress.Loopback,5000, listenOptions =>
+//    {
+//        listenOptions.UseHttps("./cert.pfx", "XsportCert@");
+//    });
 
-});
+//});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(
@@ -188,8 +188,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // Configure the HTTP request pipeline.
-app.UseHsts();
-app.UseHttpsRedirection(); // Enable HTTPS redirection
+//app.UseHsts();
+//app.UseHttpsRedirection(); // Enable HTTPS redirection
 app.UseCors(x => x
             .AllowAnyMethod()
             .AllowAnyHeader()
