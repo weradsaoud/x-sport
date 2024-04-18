@@ -13,15 +13,39 @@ namespace Xsport.DB.QueryObjects
 {
     public static class MemberShipsQueryObject
     {
-        public static IQueryable<SubscribedAcademyDto> MapCoursesToMemberShipsDto(
+        public static IQueryable<SubscribedAcademyDto> MapDatesToStrings(this IQueryable<SubscribedAcademyWithDatesDto> subscribedAcademies)
+        {
+            try
+            {
+                return subscribedAcademies.Select(sa => new SubscribedAcademyDto()
+                {
+                    AcademyId = sa.AcademyId,
+                    AcademyName = sa.AcademyName,
+                    CourseId = sa.CourseId,
+                    CourseName = sa.CourseName,
+                    CourseStartDate = sa.CourseStartDate.ToString(XsportConstants.DateOnlyFormat),
+                    CourseEndDate = sa.CourseEndDate.ToString(XsportConstants.DateOnlyFormat),
+                    KinShip = sa.KinShip,
+                    SubscriberPoints = sa.SubscriberPoints,
+                    Sport = sa.Sport,
+                    CoverPhoto = sa.CoverPhoto,
+                    CoverVideo = sa.CoverVideo,
+                    Photos = sa.Photos,
+                    Videos = sa.Videos,
+                });
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public static IQueryable<SubscribedAcademyWithDatesDto> MapCoursesToMemberShipsDto(
             this IQueryable<UserCourse> userCourses, short currentLanguageId, string domainName)
         {
             try
             {
                 return userCourses
-                    .Where(
-                    uc => uc.Course.EndDate >= DateOnly.FromDateTime(DateTime.Today))
-                    .Select(uc => new SubscribedAcademyDto()
+                    .Select(uc => new SubscribedAcademyWithDatesDto()
                     {
                         AcademyId = uc.Course.AcademyId,
                         AcademyName = uc.Course.Academy.AcademyTranslations
@@ -29,8 +53,8 @@ namespace Xsport.DB.QueryObjects
                         CourseId = uc.Course.CourseId,
                         CourseName = uc.Course.CourseTranslations
                         .Single(t => t.LanguageId == currentLanguageId).Name,
-                        CourseStartDate = uc.Course.StartDate.ToString(XsportConstants.DateOnlyFormat),
-                        CourseEndDate = uc.Course.EndDate.ToString(XsportConstants.DateOnlyFormat),
+                        CourseStartDate = uc.Course.StartDate,
+                        CourseEndDate = uc.Course.EndDate,
                         KinShip = uc.IsPersonal ?
                         (currentLanguageId == (long)LanguagesEnum.English ? "You" : "أنت") :
                         uc.Relative.RelativeTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
@@ -56,8 +80,8 @@ namespace Xsport.DB.QueryObjects
             }
         }
 
-        public static IQueryable<SubscribedAcademyDto> OrderSubscribedAcademies(
-            this IQueryable<SubscribedAcademyDto> subscribedAcademies,
+        public static IQueryable<SubscribedAcademyWithDatesDto> OrderSubscribedAcademies(
+            this IQueryable<SubscribedAcademyWithDatesDto> subscribedAcademies,
             SubscribedAcademiesOrderOptions option)
         {
             switch (option)
@@ -75,25 +99,73 @@ namespace Xsport.DB.QueryObjects
                     nameof(option), option, null);
             }
         }
-        public static IQueryable<SubscribedAcademyDto> FilterSubscribedAcademies(
-            this IQueryable<SubscribedAcademyDto> subscribedAcademies,
-            SubscribedAcademiesFilterOptions option/*, string value*/)
+        public static IQueryable<SubscribedAcademyWithDatesDto> FilterSubscribedAcademies(
+            this IQueryable<SubscribedAcademyWithDatesDto> subscribedAcademies,
+            SubscribedAcademiesFilterOptions option, string? value)
         {
             //if (string.IsNullOrEmpty(value)) return subscribedAcademies;
             switch (option)
             {
                 case SubscribedAcademiesFilterOptions.None:
                     return subscribedAcademies;
-                case SubscribedAcademiesFilterOptions.Active:
-                    return subscribedAcademies
-                        .Where(
-                        sa => DateOnly.Parse(sa.CourseStartDate) <= DateOnly.FromDateTime(DateTime.Today) &&
-                        DateOnly.Parse(sa.CourseEndDate) >= DateOnly.FromDateTime(DateTime.Today));
-                case SubscribedAcademiesFilterOptions.InActive:
-                    return subscribedAcademies
-                        .Where(
-                        sa => DateOnly.Parse(sa.CourseStartDate) >= DateOnly.FromDateTime(DateTime.Today) &&
-                        DateOnly.Parse(sa.CourseEndDate) <= DateOnly.FromDateTime(DateTime.Today));
+                case SubscribedAcademiesFilterOptions.ByActive:
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        DateOnly todyDate = DateOnly.FromDateTime(DateTime.Today);
+                        if (value == "Active")
+                            return subscribedAcademies
+                                .Where(
+                                sa => sa.CourseStartDate <= todyDate &&
+                                sa.CourseEndDate >= todyDate);
+                        if (value == "InActive")
+                            return subscribedAcademies
+                                .Where(
+                                sa => sa.CourseStartDate >= todyDate &&
+                                sa.CourseEndDate <= todyDate);
+                        return subscribedAcademies;
+                    }
+                    else
+                        return subscribedAcademies;
+                case SubscribedAcademiesFilterOptions.FilterByAcademyName:
+                    if (!string.IsNullOrEmpty(value))
+                        return subscribedAcademies
+                            .Where(sa => sa.AcademyName.ToLower().Contains(value.ToLower()));
+                    else
+                        return subscribedAcademies;
+                case SubscribedAcademiesFilterOptions.FilterBySubscriptionStartDate:
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        DateOnly subscriptionStartDate;
+                        try
+                        {
+                            subscriptionStartDate = DateOnly.Parse(value);
+                        }
+                        catch(Exception ex)
+                        {
+                            throw new Exception("Please, Provide a valid Date.");
+                        }
+                        return subscribedAcademies
+                            .Where(sa => sa.CourseStartDate >= subscriptionStartDate);
+                    }
+                    else
+                        return subscribedAcademies;
+                case SubscribedAcademiesFilterOptions.FilterBySubscriptionEndtDate:
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        DateOnly subscriptionEndDate;
+                        try
+                        {
+                            subscriptionEndDate = DateOnly.Parse(value);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception("Please, Provide a valid Date.");
+                        }
+                        return subscribedAcademies
+                            .Where(sa => sa.CourseEndDate >= subscriptionEndDate);
+                    }
+                    else
+                        return subscribedAcademies;
                 default:
                     throw new ArgumentOutOfRangeException(
                     nameof(option), option, null);

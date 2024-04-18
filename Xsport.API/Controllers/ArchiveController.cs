@@ -19,16 +19,23 @@ namespace Xsport.API.Controllers
         }
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpGet]
-        public async Task<List<AcademyArchiveItem>> AcademiesSubscriptionArchive()
+        public async Task<List<AcademyArchiveItem>> AcademiesSubscriptionArchive([FromQuery] AcademyArchiveFilter filter)
         {
-            try
+            if (ModelState.IsValid)
             {
-                if (LoggedInUser == null) throw new ApiException("You are not loggedIn", 500);
-                return await _archiveServices.AcademiesSubscriptionArchive(LoggedInUser.Id, CurrentLanguageId);
+                try
+                {
+                    if (LoggedInUser == null) throw new ApiException("You are not loggedIn", 500);
+                    return await _archiveServices.AcademiesSubscriptionArchive(LoggedInUser.Id, CurrentLanguageId, filter);
+                }
+                catch (Exception ex)
+                {
+                    throw new ApiException(ex.Message, 500);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                throw new ApiException(ex.Message, 500);
+                throw new ApiException("Invalid Input.");
             }
         }
 

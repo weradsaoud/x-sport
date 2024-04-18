@@ -43,7 +43,8 @@ namespace Xsport.Core.AcademyServices
                 return await _repositoryManager.UserCourseRepository.FindByCondition(uc => uc.XsportUserId == uId, false)
                     .MapCoursesToMemberShipsDto(currentLanguageId, domainName)
                     .OrderSubscribedAcademies(SubscribedAcademiesOrderOptions.ByCoursePointsDes)
-                    //.FilterSubscribedAcademies(SubscribedAcademiesFilterOptions.Active)
+                    .FilterSubscribedAcademies(SubscribedAcademiesFilterOptions.ByActive, "Active")
+                    .MapDatesToStrings()
                     .ToListAsync();
             }
             catch (Exception ex)

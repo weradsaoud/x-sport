@@ -9,6 +9,6 @@ namespace Xsport.Core.ArchiveServices
 {
     public interface IArchiveServices
     {
-        public Task<List<AcademyArchiveItem>> AcademiesSubscriptionArchive(long uId, short currentLanguageId);
+        public Task<List<AcademyArchiveItem>> AcademiesSubscriptionArchive(long uId, short currentLanguageId, AcademyArchiveFilter filter);
     }
 }
