@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace Xsport.Common.Enums
 {
-    public enum SubscribedAcademiesFilterOptions:short
+    public enum SubscribedAcademiesFilterOptions : short
     {
         None = 0,
-        Active = 1,
-        InActive = 2,
+        ByActive = 1,
+        FilterByAcademyName = 2,
+        FilterBySubscriptionStartDate = 3,
+        FilterBySubscriptionEndtDate = 4,
     }
 }

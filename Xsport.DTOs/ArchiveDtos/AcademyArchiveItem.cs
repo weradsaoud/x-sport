@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,5 +28,16 @@ namespace Xsport.DTOs.ArchiveDtos
         public string CourseEndDate { get; set; } = null!;
         public string KinShip { get; set; } = null!;
         public int SubscriberPoints { get; set; }
+    }
+    public class AcademyArchiveFilter
+    {
+        public string? FilterByAcademyName { get; set; } = null!;
+        [Required]
+        public bool FilterByLastYear { get; set; }
+        [Required]
+        public bool FilterByLastMonth { get; set; }
+        [Required]
+        public bool FilterByLastWeek { get; set; }
+        public bool? FilterByActive { get; set; }
     }
 }

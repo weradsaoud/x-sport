@@ -26,18 +26,37 @@ namespace Xsport.Core.ArchiveServices
             _repositoryManager = repositoryManager;
         }
 
-        public async Task<List<AcademyArchiveItem>> AcademiesSubscriptionArchive(long uId, short currentLanguageId)
+        public async Task<List<AcademyArchiveItem>> AcademiesSubscriptionArchive(
+            long uId, short currentLanguageId, AcademyArchiveFilter filter)
         {
             try
             {
                 string domainName = httpContextAccessor.HttpContext?.Request.Scheme
                     + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
-                List<SubscribedAcademyDto> SubscribedAcademies = await _repositoryManager.UserCourseRepository
+                IQueryable<SubscribedAcademyWithDatesDto> SubscribedAcademiesQ = _repositoryManager.UserCourseRepository
                     .FindByCondition(uc => uc.XsportUserId == uId, false)
                     .MapCoursesToMemberShipsDto(currentLanguageId, domainName)
-                    .OrderSubscribedAcademies(SubscribedAcademiesOrderOptions.ByCoursePointsDes)
-                    //.FilterSubscribedAcademies(SubscribedAcademiesFilterOptions.Active)
-                    .ToListAsync();
+                    .OrderSubscribedAcademies(SubscribedAcademiesOrderOptions.ByCoursePointsDes);
+                if (!string.IsNullOrEmpty(filter.FilterByAcademyName))
+                    SubscribedAcademiesQ = SubscribedAcademiesQ.FilterSubscribedAcademies(
+                        SubscribedAcademiesFilterOptions.FilterByAcademyName, filter.FilterByAcademyName);
+                if (filter.FilterByActive.HasValue)
+                    SubscribedAcademiesQ = SubscribedAcademiesQ.FilterSubscribedAcademies(
+                        SubscribedAcademiesFilterOptions.ByActive, filter.FilterByActive.Value ? "Active" : "InActive");
+                if (filter.FilterByLastYear)
+                    SubscribedAcademiesQ = SubscribedAcademiesQ.FilterSubscribedAcademies(
+                        SubscribedAcademiesFilterOptions.FilterBySubscriptionStartDate,
+                        DateOnly.FromDateTime(DateTime.Now.AddYears(-1)).ToString(XsportConstants.DateOnlyFormat));
+                if (filter.FilterByLastMonth)
+                    SubscribedAcademiesQ = SubscribedAcademiesQ.FilterSubscribedAcademies(
+                        SubscribedAcademiesFilterOptions.FilterBySubscriptionStartDate,
+                        DateOnly.FromDateTime(DateTime.Now.AddMonths(-1)).ToString(XsportConstants.DateOnlyFormat));
+                if (filter.FilterByLastWeek)
+                    SubscribedAcademiesQ = SubscribedAcademiesQ.FilterSubscribedAcademies(
+                        SubscribedAcademiesFilterOptions.FilterBySubscriptionStartDate,
+                        DateOnly.FromDateTime(DateTime.Now.AddDays(-7)).ToString(XsportConstants.DateOnlyFormat));
+                IQueryable<SubscribedAcademyDto> SubscribedAcademiesQQ = SubscribedAcademiesQ.MapDatesToStrings();
+                List<SubscribedAcademyDto> SubscribedAcademies = await SubscribedAcademiesQQ.ToListAsync();
                 return SubscribedAcademies.GroupBy(s => s.AcademyId).Select(g => new AcademyArchiveItem()
                 {
                     AcademyId = g.Key,
