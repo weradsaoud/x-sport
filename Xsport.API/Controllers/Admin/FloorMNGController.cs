@@ -1,5 +1,6 @@
 ﻿using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.MNGServices.FloorMNGServices;
 using Xsport.DTOs.CourseDtos.MNGDtos;
 using Xsport.DTOs.FloorDtos.MNGDtos;
@@ -7,7 +8,9 @@ using Xsport.DTOs.FloorDtos.MNGDtos;
 namespace Xsport.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/dashboard/[controller]/[action]")]
+    [Route("api/admin/[controller]/[action]")]
+    [Tags("FloorMNG")]
+    [ApiExplorerSettings(GroupName = "administration")]
     public class FloorMNGController : BaseController
     {
         private IFloorMNGService _floorMNGService { get; set; }

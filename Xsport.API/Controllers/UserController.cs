@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Common.Models;
 using Xsport.Core;
 using Xsport.DTOs.UserDtos;
@@ -13,6 +14,8 @@ namespace Xsport.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
+[Tags("User")]
+[ApiExplorerSettings(GroupName = "application")]
 public class UserController : BaseController
 {
     private IUserServices _userServices;

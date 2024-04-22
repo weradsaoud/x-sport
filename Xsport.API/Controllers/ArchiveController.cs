@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel;
 using Xsport.Core.ArchiveServices;
 using Xsport.DTOs.ArchiveDtos;
@@ -10,6 +11,8 @@ namespace Xsport.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [Tags("Archive")]
+    [ApiExplorerSettings(GroupName = "application")]
     public class ArchiveController : BaseController
     {
         private IArchiveServices _archiveServices { get; set; }

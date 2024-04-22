@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.ReservationServices;
 using Xsport.DTOs.ReservationDtos;
 using Xsport.DTOs.StadiumDtos;
@@ -10,6 +11,8 @@ namespace Xsport.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [Tags("Reservation")]
+    [ApiExplorerSettings(GroupName = "application")]
     public class ReservationController : BaseController
     {
         private IReservationSrvice _reservationSrvice { get; set; }

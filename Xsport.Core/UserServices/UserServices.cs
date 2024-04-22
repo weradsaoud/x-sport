@@ -106,7 +106,7 @@ public class UserServices : IUserServices
                 throw new Exception("Confirmation email could not be sent. " +
                     "Please, make sure you entered a valide email address");
             }
-            //AuthResult jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
+            AuthResult jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
             return true;
         }
         catch (Exception ex)
@@ -838,7 +838,7 @@ public class UserServices : IUserServices
         }
     }
 
-    private async Task<AuthResult> GenerateJwtToken(XsportUser user, bool enableTwoFactor)
+    public async Task<AuthResult> GenerateJwtToken(XsportUser user, bool enableTwoFactor)
     {
         try
         {
@@ -905,7 +905,7 @@ public class UserServices : IUserServices
             throw new Exception("Confirmation email could not be sent. Please, make sure you entered a valide email address");
         }
     }
-    private string GenerateEmailConfirmationCode()
+    public string GenerateEmailConfirmationCode()
     {
         try
         {

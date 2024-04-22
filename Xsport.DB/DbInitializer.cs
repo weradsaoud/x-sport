@@ -1,15 +1,18 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xsport.Common.Constants;
+using Xsport.Common.Enums;
 using Xsport.DB.Entities;
 
 namespace Xsport.DB
 {
     public static class DbInitializer
     {
-        public static void Seed(AppDbContext context)
+        public static async Task Seed(AppDbContext context, RoleManager<XsportRole> roleManager)
         {
             #region Languages
             if (!context.Languages.Any())
@@ -646,6 +649,65 @@ namespace Xsport.DB
                 context.SaveChanges();
             }
             #endregion Preferences
+            #region Roles
+            if (!context.XsportRoles.Any())
+            {
+                await roleManager.CreateAsync(new XsportRole()
+                {
+                    Id = 1,
+                    Name = XsportRoles.XsportAdmin,
+                    XsportRoleTranslations = new List<XsportRoleTranslation>()
+                    {
+                        new XsportRoleTranslation
+                        {
+                            LanguageId = (long)LanguagesEnum.English,
+                            Name = "XSport Admin"
+                        },
+                        new XsportRoleTranslation
+                        {
+                            LanguageId = (long)LanguagesEnum.Arabic,
+                            Name = "أدمن التطبيق"
+                        }
+                    }
+                });
+                await roleManager.CreateAsync(new XsportRole()
+                {
+                    Id = 2,
+                    Name = XsportRoles.PropertyOwner,
+                    XsportRoleTranslations = new List<XsportRoleTranslation>()
+                    {
+                        new XsportRoleTranslation
+                        {
+                            LanguageId = (long)LanguagesEnum.English,
+                            Name = "Property Owner"
+                        },
+                        new XsportRoleTranslation
+                        {
+                            LanguageId = (long)LanguagesEnum.Arabic,
+                            Name = "مالك منشأة"
+                        }
+                    }
+                });
+                await roleManager.CreateAsync(new XsportRole()
+                {
+                    Id = 3,
+                    Name = XsportRoles.PropertyAdmin,
+                    XsportRoleTranslations = new List<XsportRoleTranslation>()
+                    {
+                        new XsportRoleTranslation
+                        {
+                            LanguageId = (long)LanguagesEnum.English,
+                            Name = "Property Admin"
+                        },
+                        new XsportRoleTranslation
+                        {
+                            LanguageId = (long)LanguagesEnum.Arabic,
+                            Name = "أدمن منشأة"
+                        }
+                    }
+                });
+            }
+            #endregion Roles
         }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.MNGServices.GenderMNGServices;
 using Xsport.DTOs.GenderDtos.MNGDtos;
 
 namespace Xsport.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/dashboard/[controller]/[action]")]
+    [Route("api/admin/[controller]/[action]")]
+    [Tags("GenderMNG")]
+    [ApiExplorerSettings(GroupName = "administration")]
     public class GenderMNGController : BaseController
     {
         public IGenderMNGService _genderMNGService { get; set; }

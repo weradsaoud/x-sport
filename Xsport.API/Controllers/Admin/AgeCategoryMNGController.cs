@@ -1,5 +1,6 @@
 ﻿using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.MNGServices.AgeCategoryMNGServices;
 using Xsport.DB;
 using Xsport.DTOs.AdminDtos;
@@ -9,7 +10,9 @@ using Xsport.DTOs.ServiceDtos.MNGDtos;
 namespace Xsport.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/dashboard/[controller]/[action]")]
+    [Route("api/admin/[controller]/[action]")]
+    [Tags("AgeCategoryMNG")]
+    [ApiExplorerSettings(GroupName = "administration")]
     public class AgeCategoryMNGController : BaseController
     {
         public IAgeCategoryMNGService _ageCategoryMNGService { get; set; }

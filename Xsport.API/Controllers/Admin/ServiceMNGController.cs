@@ -1,12 +1,15 @@
 ﻿using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.MNGServices.ServiceMNGServices;
 using Xsport.DTOs.ServiceDtos.MNGDtos;
 
 namespace Xsport.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/dashboard/[controller]/[action]")]
+    [Route("api/admin/[controller]/[action]")]
+    [Tags("ServiceMNG")]
+    [ApiExplorerSettings(GroupName = "administration")]
     public class ServiceMNGController : BaseController
     {
         public IServiceMNGService _serviceMNGService { get; set; }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core;
 using Xsport.Core.AcademyServices;
 using Xsport.Core.SportServices;
@@ -17,7 +18,9 @@ using Xsport.DTOs.UserDtos;
 namespace Xsport.API.Controllers.Admin;
 
 [ApiController]
-[Route("api/dashboard/[controller]/[action]")]
+[Route("api/admin/[controller]/[action]")]
+[Tags("Admin")]
+[ApiExplorerSettings(GroupName = "administration")]
 public class AdminController : BaseController
 {
     private IAcademyServices _academyServices;
