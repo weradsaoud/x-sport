@@ -36,6 +36,11 @@ using Xsport.Core.ReservationServices;
 using Microsoft.AspNetCore.Server.Kestrel;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Xsport.Core.ArchiveServices;
+using Microsoft.AspNetCore.Authorization;
+using Xsport.API.Authorization.Handlers;
+using Xsport.API.Authorization.Requirements;
+using Xsport.Common.Constants;
+using Xsport.Core.DashboardServices.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -60,8 +65,27 @@ var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<Ema
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    //c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    c.SwaggerDoc("application", new OpenApiInfo
+    {
+        Title = "Application",
+        Version = "v1",
+        Description = "Application Endpoints"
+    });
 
+    c.SwaggerDoc("administration", new OpenApiInfo
+    {
+        Title = "Administration",
+        Version = "v1",
+        Description = "Administration Endpoints",
+    });
+
+    c.SwaggerDoc("dashboard", new OpenApiInfo
+    {
+        Title = "Dashboard",
+        Version = "v1",
+        Description = "Dashboard Endpoints",
+    });
     // Define the BearerAuth scheme
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -138,7 +162,18 @@ builder.Services.AddAuthentication(opt =>
     options.SaveToken = true;
     options.TokenValidationParameters = tokenValidationParameters;
 });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("PropertyOwnerPolicy", policy =>
+        policy.AddRequirements(new RoleRequirement(XsportRoles.PropertyOwner))
+        .AddRequirements(new MatchingAcademyClaimRequirement("academy_id"))
+        .RequireAuthenticatedUser());// User's academy ID must match
+
+    options.AddPolicy("PropertyAdminPolicy", policy =>
+        policy.AddRequirements(new RoleRequirement(XsportRoles.PropertyAdmin))
+        .AddRequirements(new MatchingAcademyClaimRequirement("academy_id")) // User's academy ID must match
+        .RequireAuthenticatedUser());
+});
 
 builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -163,9 +198,11 @@ builder.Services.AddScoped<IRelativeMNGService, RelativeMNGService>();
 builder.Services.AddScoped<IGenderMNGService, GenderMNGService>();
 builder.Services.AddScoped<IReservationSrvice, ReservationService>();
 builder.Services.AddScoped<IArchiveServices, ArchiveServices>();
+builder.Services.AddSingleton<IAuthorizationHandler, RoleHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, MatchingAcademyClaimHandler>();
+builder.Services.AddScoped<IDashboardUserServices, DashboardUserServices>();
 
-
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", 
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS",
     Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));
 builder.Services.AddSingleton(FirebaseApp.Create());
 
@@ -179,7 +216,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        DbInitializer.Seed(context);
+        var roleManager = services.GetRequiredService<RoleManager<XsportRole>>();
+        await DbInitializer.Seed(context, roleManager);
     }
     catch (Exception ex)
     {
@@ -203,7 +241,12 @@ app.UseStaticFiles();
 //    app.UseSwaggerUI();
 //}
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/application/swagger.json", "application");
+    c.SwaggerEndpoint("/swagger/administration/swagger.json", "administration");
+    c.SwaggerEndpoint("/swagger/dashboard/swagger.json", "dashboard");
+});
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseApiResponseAndExceptionWrapper<MapResponseObject>(new AutoWrapperOptions()

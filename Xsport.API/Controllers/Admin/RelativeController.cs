@@ -1,5 +1,6 @@
 ﻿using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.MNGServices.RelativeMNGServices;
 using Xsport.DTOs.FloorDtos.MNGDtos;
 using Xsport.DTOs.RelativeDtos.MNGDtos;
@@ -7,7 +8,9 @@ using Xsport.DTOs.RelativeDtos.MNGDtos;
 namespace Xsport.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/dashboard/[controller]/[action]")]
+    [Route("api/admin/[controller]/[action]")]
+    [Tags("Relative")]
+    [ApiExplorerSettings(GroupName = "administration")]
     public class RelativeController : BaseController
     {
         public IRelativeMNGService _relativeMNGService { get; set; }

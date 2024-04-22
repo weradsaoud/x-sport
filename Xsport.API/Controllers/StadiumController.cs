@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.StadiumServices;
 using Xsport.DTOs.StadiumDtos;
 using Xsport.DTOs.UserDtos;
@@ -10,6 +11,8 @@ namespace Xsport.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [Tags("Stadium")]
+    [ApiExplorerSettings(GroupName = "application")]
     public class StadiumController : BaseController
     {
         private IStadiumServices _stadiumService { get; set; }

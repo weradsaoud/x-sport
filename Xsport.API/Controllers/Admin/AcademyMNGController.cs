@@ -1,5 +1,6 @@
 ﻿using AutoWrapper.Wrappers;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core.MNGServices.AcademyMNGServices;
 using Xsport.Core.MNGServices.ServiceMNGServices;
 using Xsport.DTOs.AcademyDtos.MNGDtos;
@@ -9,7 +10,9 @@ using Xsport.DTOs.ServiceDtos.MNGDtos;
 namespace Xsport.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/dashboard/[controller]/[action]")]
+    [Route("api/admin/[controller]/[action]")]
+    [Tags("AcademyMNG")]
+    [ApiExplorerSettings(GroupName = "administration")]
     public class AcademyMNGController : BaseController
     {
         public IAcademyMNGService _academyMNGService { get; set; }

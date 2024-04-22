@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Swashbuckle.AspNetCore.Annotations;
 using Xsport.Core;
 using Xsport.Core.AcademyServices;
 using Xsport.Core.SportServices;
@@ -19,6 +20,8 @@ namespace Xsport.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
+[Tags("Academy")]
+[ApiExplorerSettings(GroupName = "application")]
 public class AcademyController : BaseController
 {
     private IAcademyServices _academyServices;

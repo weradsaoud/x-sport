@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Xsport.Common.Models;
 using Xsport.DB.Entities;
@@ -27,4 +28,6 @@ public interface IUserServices
     public Task<List<PlayersRankingListDto>> GetPlayers(long uId, GetPlayersReqDto dto, short currentLanguageId);
     public Task<bool> InrollUserInCourse(InrollUserInCourseDto dto);
     public Task<bool> AddAcademyReview(long uId, AddAcademyReviewDto dto);
+    public string GenerateEmailConfirmationCode();
+    public Task<AuthResult> GenerateJwtToken(XsportUser user, bool enableTwoFactor);
 }
