@@ -85,7 +85,8 @@ namespace Xsport.Core.ReservationServices
                 TimeOnly reservatonTimeTo = TimeOnly.Parse(dto.ReservatonTimeTo);
                 if (reservationDate < DateOnly.FromDateTime(DateTime.UtcNow))
                     throw new Exception("You can not reserve in the past.");
-                if (reservatonTimeFrom < TimeOnly.FromDateTime(DateTime.UtcNow) ||
+                if (reservationDate == DateOnly.FromDateTime(DateTime.UtcNow) &&
+                    reservatonTimeFrom < TimeOnly.FromDateTime(DateTime.UtcNow) ||
                     reservatonTimeTo < TimeOnly.FromDateTime(DateTime.UtcNow))
                     throw new Exception("You can not reserve in the past.");
                 StadiumFloor stadiumFloor = await _repManager.StadiumFloorRepository
