@@ -30,5 +30,6 @@ namespace Xsport.DB
         IGenderRepository GenderRepository { get; }
         IStadiumFloorRepository StadiumFloorRepository { get; }
         IReservationRepository ReservationRepository { get; }
+        IStadiumWorkingDayRepositpry StadiumWorkingDayRepositpry { get; }
     }
 }

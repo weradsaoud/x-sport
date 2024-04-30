@@ -43,6 +43,7 @@ namespace Xsport.DB
         IGenderRepository _genderRepository;
         IStadiumFloorRepository _stadiumFloorRepository;
         IReservationRepository _reservationRepository;
+        IStadiumWorkingDayRepositpry _stadiumWorkingDayRepositpry;
         public IUserRepository UserRepository
         {
             get
@@ -201,6 +202,14 @@ namespace Xsport.DB
             {
                 _reservationRepository ??= new ReservationRepository(db);
                 return _reservationRepository;
+            }
+        }
+        public IStadiumWorkingDayRepositpry StadiumWorkingDayRepositpry
+        {
+            get
+            {
+                _stadiumWorkingDayRepositpry ??= new StadiumWorkingDayRepository(db);
+                return _stadiumWorkingDayRepositpry;
             }
         }
         public void Dispose() => _db.Dispose();
