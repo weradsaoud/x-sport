@@ -27,7 +27,9 @@ namespace Xsport.DB.QueryObjects
                     CloseTime = academy.AcademyWorkingDays
                     .Single(w => w.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
                     .CloseAt.ToString(XsportConstants.TimeOnlyFormat),
-                    MinPrice = academy.Courses.OrderBy(c => c.Price).First().Price,
+                    MinPrice = (academy.Courses.OrderBy(c => c.Price).First() == null) ?
+                    0 :
+                    academy.Courses.OrderBy(c => c.Price).First().Price,
                     NumReviews = academy.AcademyReviews.Count,
                     Evaluation = (academy.AcademyReviews.Count == 0) ?
                     0 :
