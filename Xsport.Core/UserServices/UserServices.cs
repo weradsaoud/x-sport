@@ -680,6 +680,9 @@ public class UserServices : IUserServices
                 throw new Exception("User does not exist.");
             Course course = await _db.Courses.SingleOrDefaultAsync(_ => _.CourseId == dto.CourseId) ??
                 throw new Exception("Course does not exist.");
+            DateOnly todyDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (course.EndDate <= todyDate)
+                throw new Exception("You can not be inrolled in a course that was already finished.");
             if (!dto.IsPersonal)
             {
                 if (dto.RelativeId == null || dto.RelativeId == 0)
