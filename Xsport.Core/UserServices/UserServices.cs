@@ -24,6 +24,7 @@ using Xsport.DB;
 using Xsport.Common.Constants;
 using Xsport.DB.QueryObjects;
 using Xsport.Common.Enums;
+using Xsport.Core.LoggerServices;
 
 namespace Xsport.Core;
 public class UserServices : IUserServices
@@ -31,6 +32,7 @@ public class UserServices : IUserServices
     private readonly AppDbContext _db;
     private readonly IWebHostEnvironment webHostEnvironment;
     private readonly IHttpContextAccessor httpContextAccessor;
+    private readonly ILoggerManager _logger;
     private UserManager<XsportUser> userManager { get; }
     private JwtConfig JwtConfig { get; }
     GeneralConfig GeneralConfig { get; }
@@ -44,7 +46,8 @@ public class UserServices : IUserServices
         IOptionsMonitor<JwtConfig> _optionsMonitor,
         IOptionsMonitor<GeneralConfig> _optionsMonitor2,
         IEmailService _emailService,
-        IRepositoryManager repositoryManager)
+        IRepositoryManager repositoryManager,
+        ILoggerManager logger)
     {
         _db = db;
         webHostEnvironment = _webHostEnvironment;
@@ -54,6 +57,7 @@ public class UserServices : IUserServices
         GeneralConfig = _optionsMonitor2.CurrentValue;
         emailService = _emailService;
         _repositoryManager = repositoryManager;
+        _logger = logger;
     }
 
     public async Task<bool> Register(UserRegistrationDto user, short currentLanguageId)
@@ -220,6 +224,7 @@ public class UserServices : IUserServices
     {
         try
         {
+            _logger.LogInfo($"User with email = ${user.Email} trying to login.");
             var existingUser = await userManager.FindByEmailAsync(user.Email) ?? throw new Exception("User does not exist");
             var isLockout = await userManager.IsLockedOutAsync(existingUser);
             if (isLockout)

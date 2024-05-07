@@ -41,8 +41,12 @@ using Xsport.API.Authorization.Handlers;
 using Xsport.API.Authorization.Requirements;
 using Xsport.Common.Constants;
 using Xsport.Core.DashboardServices.UserServices;
+using NLog;
+using Xsport.Core.LoggerServices;
+using NLog.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
@@ -146,6 +150,11 @@ builder.Services.AddIdentity<XsportUser, XsportRole>(options =>
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddLogging(builder =>
+{
+    builder.AddNLog("nlog.config");
+});
 builder.Services.AddControllers();
 //builder.Services.AddAuthentication(options =>
 //{
