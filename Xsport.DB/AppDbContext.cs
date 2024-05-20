@@ -45,6 +45,7 @@ public class AppDbContext : IdentityDbContext<XsportUser, XsportRole, long>
     public DbSet<Mutimedia> Mutimedias { get; set; }
     public DbSet<AcademyReview> AcademyReviews { get; set; }
     public DbSet<Stadium> Stadiums { get; set; }
+    public DbSet<StadiumCreationProcess> StadiumCreationProcesses { get; set; }
     public DbSet<StadiumTranslation> StadiumTranslations { get; set; }
     public DbSet<StadiumWorkingDay> StadiumWorkingDays { get; set; }
     public DbSet<StadiumService> StadiumServices { get; set; }

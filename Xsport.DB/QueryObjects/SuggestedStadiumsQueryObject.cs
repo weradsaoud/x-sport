@@ -35,8 +35,8 @@ namespace Xsport.DB.QueryObjects
                     NumOfReviews = stadium.StadiumReviews.Count(),
                     Evaluation = stadium.StadiumReviews.Count() > 0 ?
                     stadium.StadiumReviews.Select(r => r.Evaluation).Average() : 0,
-                    Lat = stadium.Latitude,
-                    Long = stadium.Longitude,
+                    Lat = stadium.Latitude ?? 0,
+                    Long = stadium.Longitude ?? 0,
                     //TODO region name
                     CoverPhoto = string.IsNullOrEmpty(stadium.Mutimedias
                     .Single(m => m.IsCover == true && m.IsVideo == false).FilePath)

@@ -9,9 +9,9 @@ namespace Xsport.DB.Entities
     public class Stadium
     {
         public long StadiumId { get; set; }
-        public decimal Latitude { get; set; }
-        public decimal Longitude { get; set; }
-        public decimal Price { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+        
 
         //foriegn keys
         public long? AcademyId { get; set; }

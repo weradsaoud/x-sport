@@ -41,6 +41,7 @@ using Xsport.API.Authorization.Handlers;
 using Xsport.API.Authorization.Requirements;
 using Xsport.Common.Constants;
 using Xsport.Core.DashboardServices.UserServices;
+using Xsport.Core.DashboardServices.StadiumServices;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -201,6 +202,7 @@ builder.Services.AddScoped<IArchiveServices, ArchiveServices>();
 builder.Services.AddSingleton<IAuthorizationHandler, RoleHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, MatchingAcademyClaimHandler>();
 builder.Services.AddScoped<IDashboardUserServices, DashboardUserServices>();
+builder.Services.AddScoped<IDashboardStadiumServices, DashboardStadiumServices>();
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS",
     Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));

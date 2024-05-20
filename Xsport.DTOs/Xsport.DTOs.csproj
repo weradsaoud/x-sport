@@ -17,5 +17,11 @@
 	<ItemGroup>
 		<ProjectReference Include="../Xsport.Common/Xsport.Common.csproj" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Reference Include="Xsport.DB">
+	    <HintPath>..\Xsport.DB\bin\Debug\net8.0\Xsport.DB.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
 </Project>

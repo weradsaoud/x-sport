@@ -14,6 +14,7 @@ namespace Xsport.DB
         IAcademyRepository AcademyRepository { get; }
         ISportRepository SportRepository { get; }
         IStadiumRepository StadiumRepository { get; }
+        IStadiumCreationProcessRepository StadiumCreationProcessRepository { get; }
         IMutimediaRepository MutimediaRepository { get; }
         IServiceRepository ServiceRepository { get; }
         IStadiumServiceRepository StadiumServiceRepository { get; }

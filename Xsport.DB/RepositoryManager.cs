@@ -27,6 +27,7 @@ namespace Xsport.DB
         IAcademyRepository _academyRepository;
         ISportRepository _sportRepository;
         IStadiumRepository _stadiumRepository;
+        IStadiumCreationProcessRepository _stadiumCreationProcessRepository;
         IMutimediaRepository _mutimediaRepository;
         IServiceRepository _serviceRepository;
         IStadiumServiceRepository _stadiumServiceRepository;
@@ -73,6 +74,15 @@ namespace Xsport.DB
             {
                 _stadiumRepository ??= new StadiumRepository(db);
                 return _stadiumRepository;
+            }
+        }
+
+        public IStadiumCreationProcessRepository StadiumCreationProcessRepository
+        {
+            get
+            {
+                _stadiumCreationProcessRepository ??= new StadiumCreationProcessRepository(db);
+                return _stadiumCreationProcessRepository;
             }
         }
         public IMutimediaRepository MutimediaRepository
