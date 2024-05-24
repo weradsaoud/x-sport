@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.DB;
@@ -11,9 +12,11 @@ using Xsport.DB;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240520110747_allow-nullable")]
+    partial class allownullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1001,7 +1004,7 @@ namespace Xsport.API.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("StadiumId")
+                    b.Property<long>("StadiumDataStadiumId")
                         .HasColumnType("bigint");
 
                     b.Property<long>("UserId")
@@ -1009,7 +1012,7 @@ namespace Xsport.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StadiumId");
+                    b.HasIndex("StadiumDataStadiumId");
 
                     b.ToTable("StadiumCreationProcesses");
                 });
@@ -1979,13 +1982,13 @@ namespace Xsport.API.Migrations
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumCreationProcess", b =>
                 {
-                    b.HasOne("Xsport.DB.Entities.Stadium", "Stadium")
+                    b.HasOne("Xsport.DB.Entities.Stadium", "StadiumData")
                         .WithMany()
-                        .HasForeignKey("StadiumId")
+                        .HasForeignKey("StadiumDataStadiumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Stadium");
+                    b.Navigation("StadiumData");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>

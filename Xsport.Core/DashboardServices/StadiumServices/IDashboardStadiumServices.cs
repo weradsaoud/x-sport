@@ -10,11 +10,12 @@ namespace Xsport.Core.DashboardServices.StadiumServices
 {
     public interface IDashboardStadiumServices
     {
-        Task<List<StadiumCreationProcess>> StartProcess(string userId);
-        Task<StadiumCreationProcess> SaveStep(StadiumStepDataModel model);
-        Task<long> AddStadiumStepOne(StadiumStepOneDto step1DTO);
-        Task AddStadiumStepTwo(long stadiumId, StadiumStepTwoDto step2DTO);
-        Task AddStadiumStepThree(long stadiumId, StadiumStepThreeDto step3DTO);
+        Task<List<StadiumProcessCreationDto>> GetStadiumCreatopnProcesses(long userId);
+        Task<StadiumStepDataModel> SaveStep(long userId, StadiumStepDataModel model);
+        Task<long> CompleteCreationProcess(long userId, long processId);
+        //Task<long> AddStadiumStepOne(StadiumStepOneDto step1DTO);
+        //Task AddStadiumStepTwo(long stadiumId, StadiumStepTwoDto step2DTO);
+        //Task AddStadiumStepThree(long stadiumId, StadiumStepThreeDto step3DTO);
 
     }
 }

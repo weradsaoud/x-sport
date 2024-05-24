@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.DB;
@@ -11,9 +12,11 @@ using Xsport.DB;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240520113022_add-forigen-key")]
+    partial class addforigenkey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1001,7 +1004,10 @@ namespace Xsport.API.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("StadiumId")
+                    b.Property<int>("StadiumId")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("StadiumId1")
                         .HasColumnType("bigint");
 
                     b.Property<long>("UserId")
@@ -1009,7 +1015,7 @@ namespace Xsport.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StadiumId");
+                    b.HasIndex("StadiumId1");
 
                     b.ToTable("StadiumCreationProcesses");
                 });
@@ -1981,7 +1987,7 @@ namespace Xsport.API.Migrations
                 {
                     b.HasOne("Xsport.DB.Entities.Stadium", "Stadium")
                         .WithMany()
-                        .HasForeignKey("StadiumId")
+                        .HasForeignKey("StadiumId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -9,9 +9,10 @@ namespace Xsport.DB.Entities
     public class StadiumCreationProcess
     {
         public long Id { get; set; }
-        public required string UserId { get; set; }
+        public required long UserId { get; set; }
         public int CurrentStep { get; set; }
-        public Stadium StadiumData { get; set; } = new Stadium();
+        public long StadiumId { get; set; }
+        public Stadium Stadium { get; set; }
         public DateTime LastUpdated { get; set; }
     }
 }

@@ -11,16 +11,36 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
 {
     public class StadiumCreationDto
     {
-        public DashboardStadiumDto GenerealInfo { get; set; }
-        public List<DashboardStadiumFloorDto> Floors { get; set; }
-        public DashboardStadiumMultimediaDto Multimedia { get; set; }
-        public DashboardStadiumServicesDto Services { get; set; }
-        public DashboardStaduimWorkingDaysDto WorkingDays { get; set; }
+        public DashboardStadiumDto? GenerealInfo { get; set; }
+        public DashboardStadiumFloorsDto? Floors { get; set; }
+        public DashboardStadiumMultimediaDto? Multimedia { get; set; }
+        public DashboardStadiumServicesDto? Services { get; set; }
+        public DashboardStaduimWorkingDaysDto? WorkingDays { get; set; }
 
     }
 
-    
+    public class StadiumDashboardDto
+    {
+        public DashboardStadiumDto? GenerealInfo { get; set; }
+        public List<DashboardStadiumFloorDto>? Floors { get; set; }
+        public string CoverPhoto { get; set; } = null!;
+        public string CoverVideo { get; set; } = null!;
+        public List<string> Photos { get; set; } = null!;
+        public List<string> Videos { get; set; } = null!;
+        public DashboardStadiumServicesDto? Services { get; set; }
+        public DashboardStaduimWorkingDaysDto? WorkingDays { get; set; }
+    }
 
+    public class DashboardStadiumDiscriptionDto
+    {
+        public string? ArDescription { get; set; } = null!;
+        public string? EnDescription { get; set; } = null!;
+    }
+    public class DashboardStadiumLocationDto
+    {
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+    }
     public class DashboardStadiumDto
     {
         public string? ArName { get; set; } = null!;
@@ -30,11 +50,32 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
         public decimal? Lat { get; set; }
         public decimal? Long { get; set; }
     }
+
     public class DashboardStadiumFloorDto
     {
-        [Required] public int Id { get; set; }
-        [Required] public decimal Price { get; set; }
-        [Required] public long FloorId { get; set; }
+        public long StadiumFloorId { get; set; }
+        public decimal Price { get; set; }
+    }
+
+    public class DashboardStadiumFloorsDto
+    {
+        public List<long> FloorIds { get; set; } = null!;
+    }
+    public class FloorDto
+    {
+        public long FloorId { get; set; }
+        public int NumOfPlayers { get; set; }
+    }
+
+    public class StadiumFloorDto
+    {
+        public long FloorId { get; set; }
+        public int NumOfPlayers { get; set; }
+    }
+    public class DashboardStadiumNameDto
+    {
+        public string ArName { get; set; } = null!;
+        public string EnName { get; set; } = null!;
     }
     public class DashboardStadiumMultimediaDto
     {
@@ -56,8 +97,8 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
     }
     public class DashboardStadiumWorkingDayDto
     {
-        public long WorkingDayId { get; set; }
-        public string OpenAt { get; set; } = null!;
-        public string CloseAt { get; set; } = null!;
+        public long? WorkingDayId { get; set; }
+        public string? OpenAt { get; set; } = null!;
+        public string? CloseAt { get; set; } = null!;
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.DB;
@@ -11,9 +12,11 @@ using Xsport.DB;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240520094536_addStadiumCreationProcess")]
+    partial class addStadiumCreationProcess
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -624,6 +627,7 @@ namespace Xsport.API.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("FilePath")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsCover")
@@ -1001,15 +1005,16 @@ namespace Xsport.API.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("StadiumId")
+                    b.Property<long>("StadiumDataStadiumId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StadiumId");
+                    b.HasIndex("StadiumDataStadiumId");
 
                     b.ToTable("StadiumCreationProcesses");
                 });
@@ -1105,12 +1110,14 @@ namespace Xsport.API.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("StadiumTranslationId"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("LanguageId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("StadiumId")
@@ -1979,13 +1986,13 @@ namespace Xsport.API.Migrations
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumCreationProcess", b =>
                 {
-                    b.HasOne("Xsport.DB.Entities.Stadium", "Stadium")
+                    b.HasOne("Xsport.DB.Entities.Stadium", "StadiumData")
                         .WithMany()
-                        .HasForeignKey("StadiumId")
+                        .HasForeignKey("StadiumDataStadiumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Stadium");
+                    b.Navigation("StadiumData");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>

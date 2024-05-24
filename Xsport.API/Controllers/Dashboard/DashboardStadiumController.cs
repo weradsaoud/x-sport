@@ -22,36 +22,36 @@ namespace Xsport.API.Controllers.Dashboard
             _stadiumDashboardService = stadiumDashboardService;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddStadiumStepOne([FromBody] StadiumStepOneDto step1DTO)
-        {
-            var stadiumId = await _stadiumDashboardService.AddStadiumStepOne(step1DTO);
-            return Ok(stadiumId);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> AddStadiumStepOne([FromBody] StadiumStepOneDto step1DTO)
+        //{
+        //    var stadiumId = await _stadiumDashboardService.AddStadiumStepOne(step1DTO);
+        //    return Ok(stadiumId);
+        //}
 
-        [HttpPost("{stadiumId}")]
-        public async Task<IActionResult> AddStadiumStepTwo(long stadiumId, [FromBody] StadiumStepTwoDto step2DTO)
-        {
-            await _stadiumDashboardService.AddStadiumStepTwo(stadiumId, step2DTO);
-            return Ok();
-        }
+        //[HttpPost("{stadiumId}")]
+        //public async Task<IActionResult> AddStadiumStepTwo(long stadiumId, [FromBody] StadiumStepTwoDto step2DTO)
+        //{
+        //    await _stadiumDashboardService.AddStadiumStepTwo(stadiumId, step2DTO);
+        //    return Ok();
+        //}
 
-        [HttpPost("{stadiumId}")]
-        public async Task<IActionResult> AddStadiumStepThree(long stadiumId, [FromBody] StadiumStepThreeDto step3DTO)
-        {
-            await _stadiumDashboardService.AddStadiumStepThree(stadiumId, step3DTO);
-            return Ok();
-        }
+        //[HttpPost("{stadiumId}")]
+        //public async Task<IActionResult> AddStadiumStepThree(long stadiumId, [FromBody] StadiumStepThreeDto step3DTO)
+        //{
+        //    await _stadiumDashboardService.AddStadiumStepThree(stadiumId, step3DTO);
+        //    return Ok();
+        //}
 
         // Start a new stadium creation process or retrieve an existing one
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("start")]
-        public async Task<IActionResult> StartProcess()
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet]
+        public async Task<List<StadiumProcessCreationDto>> StartProcess()
         {
             try
             {
-                if (LoggedInUser == null) throw new ApiException("You are not signed in.");
-                return Ok(await _stadiumDashboardService.StartProcess(LoggedInUser.Uid!));
+                //if (LoggedInUser == null) throw new ApiException("You are not signed in.");
+                return await _stadiumDashboardService.GetStadiumCreatopnProcesses(1);
             }
             catch (Exception ex)
             {
@@ -60,13 +60,14 @@ namespace Xsport.API.Controllers.Dashboard
         }
 
         // Save current step data
-        [HttpPost("saveStep")]
-        public async Task<IActionResult> SaveStep([FromBody] StadiumStepDataModel model)
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<StadiumStepDataModel> SaveStep([FromBody] StadiumStepDataModel model)
         {
             try
             {
-                if (LoggedInUser == null) throw new ApiException("You are not signed in.");
-                return Ok(await _stadiumDashboardService.SaveStep(model));
+                //if (LoggedInUser == null) throw new ApiException("You are not signed in.");
+                return await _stadiumDashboardService.SaveStep(1, model);
             }
             catch (Exception ex)
             {
@@ -89,28 +90,20 @@ namespace Xsport.API.Controllers.Dashboard
         //    return Ok(process);
         //}
 
-        //// Complete the creation process
-        //[HttpPost("complete")]
-        //public async Task<IActionResult> CompleteProcess(Guid processId, string userId)
-        //{
-        //    var process = await _context.StadiumCreationProcesses
-        //        .FirstOrDefaultAsync(p => p.Id == processId && p.UserId == userId);
-
-        //    if (process == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var stadium = process.StadiumData;
-
-        //    _context.Stadiums.Add(stadium);
-        //    await _context.SaveChangesAsync();
-
-        //    // Remove the process record
-        //    _context.StadiumCreationProcesses.Remove(process);
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok(stadium);
-        //}
+        // Complete the creation process
+        //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("complete")]
+        public async Task<IActionResult> CompleteProcess(long processId)
+        {
+            try
+            {
+                //if (LoggedInUser == null) throw new ApiException("You are not signed in.");
+                return Ok(await _stadiumDashboardService.CompleteCreationProcess(1, processId));
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message);
+            }
+        }
     }
 }

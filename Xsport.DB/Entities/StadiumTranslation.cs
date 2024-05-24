@@ -9,8 +9,8 @@ namespace Xsport.DB.Entities
     public class StadiumTranslation
     {
         public long StadiumTranslationId { get; set; }
-        public string Name { get; set; } = null!;
-        public string Description { get; set; } = null!;
+        public string? Name { get; set; } = null!;
+        public string? Description { get; set; } = null!;
         public long StadiumId { get; set; }
         public long LanguageId { get; set; }
 
