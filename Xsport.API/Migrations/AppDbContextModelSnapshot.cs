@@ -1399,14 +1399,8 @@ namespace Xsport.API.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<string>("EmailConfirmationCode")
-                        .HasColumnType("text");
-
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<string>("Gender")
-                        .HasColumnType("text");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
@@ -1426,9 +1420,6 @@ namespace Xsport.API.Migrations
                     b.Property<int>("LoyaltyPoints")
                         .HasColumnType("integer");
 
-                    b.Property<string>("NewEmail")
-                        .HasColumnType("text");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -1445,6 +1436,12 @@ namespace Xsport.API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<short>("RegistrationStatus")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("ResetPasswordCode")
+                        .HasColumnType("text");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");

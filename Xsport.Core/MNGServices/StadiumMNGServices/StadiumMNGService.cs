@@ -178,5 +178,36 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<bool> AddStadiumWorkingDays(StadiumWorkingDaysDto dto)
+        {
+            try
+            {
+                Stadium? stadium = await _repManager.StadiumRepository
+                    .FindByCondition(a => a.StadiumId == dto.StadiumId, false)
+                    .SingleOrDefaultAsync() ?? throw new Exception("Stadium does not exist.");
+                foreach (var day in dto.StadiumWorkingDays)
+                {
+                    WorkingDay workingDay = await _repManager.WorkingDayRepository
+                        .FindByCondition(w => w.WorkingDayId == day.WorkingDayId, false)
+                        .SingleOrDefaultAsync()
+                        ?? throw new Exception($"WokingDay with id = {day.WorkingDayId} does not exist.");
+                    StadiumWorkingDay stadiumWorkingDay = new StadiumWorkingDay()
+                    {
+                        StadiumId = stadium.StadiumId,
+                        WorkingDayId = day.WorkingDayId,
+                        OpenAt = TimeOnly.Parse(day.OpenAt),
+                        CloseAt = TimeOnly.Parse(day.CloseAt)
+                    };
+                    await _repManager.StadiumWorkingDayRepositpry
+                        .CreateAsync(stadiumWorkingDay);
+                }
+                await _repManager.StadiumWorkingDayRepositpry.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

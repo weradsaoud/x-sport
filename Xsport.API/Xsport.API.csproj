@@ -49,6 +49,7 @@
 
 	<ItemGroup>
 		<Folder Include="wwwroot\Images\" />
+		<Folder Include="wwwroot\Logs\logs_debug\" />
 	</ItemGroup>
 
 </Project>

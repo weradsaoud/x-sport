@@ -11,10 +11,4 @@ public class UserRegistrationDto
     public string Password { get; set; } = null!;
     [Required]
     public string Phone { get; set; } = null!;
-    [Required]
-    public string Gender { get; set; } = null!;
-    [Required]
-    public decimal Longitude { get; set; }
-    [Required]
-    public decimal Latitude { get; set; }
 }

@@ -5,6 +5,7 @@
     <PackageReference Include="MailKit" Version="4.3.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="MimeKit" Version="4.3.0" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.0" />
   </ItemGroup>
 

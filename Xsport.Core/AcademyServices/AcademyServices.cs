@@ -162,11 +162,12 @@ namespace Xsport.Core.AcademyServices
             {
                 string domainName = httpContextAccessor.HttpContext?.Request.Scheme
                     + "://" + httpContextAccessor.HttpContext?.Request.Host.Value;
-                var academies = await _repositoryManager.AcademyRepository.FindAll(false)
+                var academiesQuery = _repositoryManager.AcademyRepository.FindAll(false)
                     .MapAcademiesToSuggested(currentLanguageId, domainName)
                     .OrderSuggestedAcademies(SuggestedAcademiesOrderOptions.EvaluationDown)
                     .FilterSuggestedAcademies(SuggestedAcademiesFilterOptions.None, string.Empty)
-                    .Page<SuggestedAcademyDto>(dto.PageNumber, dto.PageSize).ToListAsync();
+                    .Page<SuggestedAcademyDto>(dto.PageNumber, dto.PageSize);
+                var academies = await academiesQuery.ToListAsync();
                 //var suggestedAcademies = await academies
                 //    .Where(a => Utils.CalculateDistanceBetweenTowUsers(
                 //        user.Latitude ?? 0, user.Longitude ?? 0, a.Lat, a.Long)

@@ -41,10 +41,13 @@ using Xsport.API.Authorization.Handlers;
 using Xsport.API.Authorization.Requirements;
 using Xsport.Common.Constants;
 using Xsport.Core.DashboardServices.UserServices;
-using Xsport.Core.DashboardServices.StadiumServices;
+using NLog;
+using Xsport.Core.LoggerServices;
+using NLog.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+var connectionString = builder.Configuration.GetConnectionString("AWSConnectionEC2");
 string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);
@@ -147,6 +150,11 @@ builder.Services.AddIdentity<XsportUser, XsportRole>(options =>
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
+builder.Services.AddLogging(builder =>
+{
+    builder.AddNLog("nlog.config");
+});
 builder.Services.AddControllers();
 //builder.Services.AddAuthentication(options =>
 //{
@@ -217,7 +225,17 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<AppDbContext>();
+        await using AppDbContext dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        await dbContext.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+
+    }
+    try
+    {
+        await using AppDbContext context = services.GetRequiredService<AppDbContext>();
         var roleManager = services.GetRequiredService<RoleManager<XsportRole>>();
         await DbInitializer.Seed(context, roleManager);
     }

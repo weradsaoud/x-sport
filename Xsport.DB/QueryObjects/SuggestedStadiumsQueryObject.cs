@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xsport.Common.Constants;
 using Xsport.Common.Enums;
 using Xsport.DB.Entities;
 using Xsport.DTOs;
@@ -35,8 +36,15 @@ namespace Xsport.DB.QueryObjects
                     NumOfReviews = stadium.StadiumReviews.Count(),
                     Evaluation = stadium.StadiumReviews.Count() > 0 ?
                     stadium.StadiumReviews.Select(r => r.Evaluation).Average() : 0,
-                    Lat = stadium.Latitude ?? 0,
-                    Long = stadium.Longitude ?? 0,
+                    Lat = stadium.Latitude,
+                    Long = stadium.Longitude,
+                    StadiumWorkDays = stadium.StadiumWorkingDays.Select(sw => new StadiumWorkDay()
+                    {
+                        DayOrder = sw.WorkingDay.OrderInWeek,
+                        DayName = sw.WorkingDay.WorkingDayTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
+                        OpenAt = sw.OpenAt.ToString(XsportConstants.TimeOnlyFormat),
+                        CloseAt = sw.CloseAt.ToString(XsportConstants.TimeOnlyFormat)
+                    }).ToList(),
                     //TODO region name
                     CoverPhoto = string.IsNullOrEmpty(stadium.Mutimedias
                     .Single(m => m.IsCover == true && m.IsVideo == false).FilePath)

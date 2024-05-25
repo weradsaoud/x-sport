@@ -120,7 +120,7 @@ namespace Xsport.DB.QueryObjects
                         if (value == "InActive")
                             return subscribedAcademies
                                 .Where(
-                                sa => sa.CourseStartDate >= todyDate &&
+                                sa => sa.CourseStartDate >= todyDate ||
                                 sa.CourseEndDate <= todyDate);
                         return subscribedAcademies;
                     }
