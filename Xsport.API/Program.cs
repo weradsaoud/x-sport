@@ -47,7 +47,7 @@ using NLog.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 LogManager.Setup().LoadConfigurationFromFile(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("AWSConnectionEC2");
 string issuer = builder.Configuration.GetValue<string>("JwtConfig:Issuer") ?? string.Empty;
 string signingKey = builder.Configuration.GetValue<string>("JwtConfig:Secret") ?? string.Empty;
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);

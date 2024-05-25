@@ -32,7 +32,7 @@ namespace Xsport.Core.DashboardServices.UserServices
         {
             try
             {
-                if (user == null) throw new Exception(UserServiceErrors.bad_request_data);
+                if (user == null) throw new Exception(UserServiceErrors.bad_request_data_en);
                 if (user.Email.IsNullOrEmpty()) throw new Exception("Email is required");
                 //check if user exists
                 var existingUser = await _userManager.FindByEmailAsync(user.Email);
@@ -48,10 +48,6 @@ namespace Xsport.Core.DashboardServices.UserServices
                     XsportName = user.Name,
                     PhoneNumber = user.Phone,
                     LoyaltyPoints = 0,
-                    Gender = user.Gender,
-                    Latitude = user.Latitude,
-                    Longitude = user.Longitude,
-                    EmailConfirmationCode = confirmationCode,
                     ImagePath = "",
                     AuthenticationProvider = "EmailPassword"
                 };

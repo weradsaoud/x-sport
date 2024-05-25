@@ -20,8 +20,6 @@ namespace Xsport.DTOs.UserDtos
         public decimal Latitude { get; set; } = 0;
         [Required]
         public List<long> SportsIds { get; set; } = null!;
-        [Required]
-        public string Gender { get; set; } = null!;
         public IFormFile? File { get; set; } = null!;
     }
 }

@@ -25,6 +25,7 @@ using Xsport.Common.Constants;
 using Xsport.DB.QueryObjects;
 using Xsport.Common.Enums;
 using Xsport.Core.LoggerServices;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Xsport.Core;
 public class UserServices : IUserServices
@@ -60,19 +61,24 @@ public class UserServices : IUserServices
         _logger = logger;
     }
 
-    public async Task<bool> Register(UserRegistrationDto user, short currentLanguageId)
+    public async Task<AuthResult> Register(UserRegistrationDto user, short currentLanguageId)
     {
         try
         {
-            if (user == null) throw new Exception(UserServiceErrors.bad_request_data);
-            if (user.Email.IsNullOrEmpty()) throw new Exception("Email is required");
+            if (user == null) throw new Exception(
+                currentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.bad_request_data_en :
+                UserServiceErrors.bad_request_data_ar);
+            if (user.Email.IsNullOrEmpty()) throw new Exception(
+                currentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.required_email_en :
+                UserServiceErrors.required_email_ar);
             //check if user exists
             var existingUser = await userManager.FindByEmailAsync(user.Email);
-            if (existingUser != null) throw new Exception($"{user.Email} is already taken");
-            //string confirmationCode = await SendActivationCode(user.Email);
-            //if (confirmationCode.IsNullOrEmpty())
-            //    throw new Exception("Could not generate confirmation code");
-            string confirmationCode = GenerateEmailConfirmationCode();
+            if (existingUser != null) throw new Exception(user.Email +
+                ((currentLanguageId == (short)LanguagesEnum.English) ?
+                UserServiceErrors.email_taken_en :
+                UserServiceErrors.email_taken_ar));
             XsportUser xsportUser = new XsportUser()
             {
                 Email = user.Email,
@@ -80,12 +86,9 @@ public class UserServices : IUserServices
                 XsportName = user.Name,
                 PhoneNumber = user.Phone,
                 LoyaltyPoints = 0,
-                Gender = user.Gender,
-                Latitude = user.Latitude,
-                Longitude = user.Longitude,
-                EmailConfirmationCode = confirmationCode,
                 ImagePath = "",
-                AuthenticationProvider = "EmailPassword"
+                AuthenticationProvider = "EmailPassword",
+                RegistrationStatus = (short)RegistrationStatusEnum.registeredWithEmailAndPassword
             };
             var isCreated = await userManager.CreateAsync(xsportUser, user.Password);
             if (!isCreated.Succeeded)
@@ -98,121 +101,68 @@ public class UserServices : IUserServices
 
                 throw new Exception(errorMessage);
             }
+            //try
+            //{
+            //    var message = new Message(
+            //        new List<string>() { user.Email ?? string.Empty },
+            //        "Account Confirmation", confirmationCode, null);
+            //    await emailService.SendEmailAsync(message);
+            //}
+            //catch (Exception)
+            //{
+            //    throw new Exception("Confirmation email could not be sent. " +
+            //        "Please, make sure you entered a valide email address");
+            //}
+            
+            AuthResult jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
+            return jwtToken;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public Task<short> AccountStatus(XsportUser user)
+    {
+        try
+        {
+            return Task.FromResult(user.RegistrationStatus);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
+    public async Task<ResetPassworTokendDto> ForgotPassword(ForgotPasswordDto dto, short currentLanguageId)
+    {
+        try
+        {
+            var existingUser = await userManager.FindByEmailAsync(dto.Email) ??
+                throw new Exception(currentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.user_does_not_exist_en :
+                UserServiceErrors.user_does_not_exist_ar);
+            string confirmationCode = GenerateEmailConfirmationCode();
             try
             {
                 var message = new Message(
-                    new List<string>() { user.Email ?? string.Empty },
-                    "Account Confirmation", confirmationCode, null);
+                    new List<string>() { dto.Email ?? string.Empty },
+                    "Reset Password", confirmationCode, null);
                 await emailService.SendEmailAsync(message);
             }
             catch (Exception)
             {
-                throw new Exception("Confirmation email could not be sent. " +
-                    "Please, make sure you entered a valide email address");
+                throw new Exception(
+                    currentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.email_send_error_en :
+                    UserServiceErrors.email_send_error_ar);
             }
-            AuthResult jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-    public async Task<short> AccountStatus(AccountStatusDto dto)
-    {
-        try
-        {
-            XsportUser user = await _db.XsportUsers
-                .Where(u => u.Email == dto.Email)
-                .Include(u => u.UserSports)
-                .SingleOrDefaultAsync() ?? throw new Exception("User does not exist.");
-            if (user.EmailConfirmed && user.UserSports.Any())
-                return (short)AccountStatusEnum.Ready;
-            if (user.EmailConfirmed && !user.UserSports.Any())
-                return (short)AccountStatusEnum.ConfirmedButNoFavSports;
-            if (!user.EmailConfirmed)
-                return (short)AccountStatusEnum.NotConfirmed;
-            return (short)AccountStatusEnum.Unknown;
-
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-    public async Task<bool> ResendEmailConfirmationCode(UserLoginRequest dto)
-    {
-        try
-        {
-            var oldEmailUser = await userManager.FindByEmailAsync(dto.Email);
-            string code = string.Empty;
-            if (oldEmailUser == null)
-            {
-                var newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email) ??
-                    throw new Exception("User does not exist.");
-                code = await SendActivationCode(dto.Email);
-                if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
-                newEmailUser.EmailConfirmationCode = code;
-                await _db.SaveChangesAsync();
-                return true;
-            }
-            code = await SendActivationCode(dto.Email);
-            if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
-            oldEmailUser.EmailConfirmationCode = code;
+            existingUser.ResetPasswordCode = confirmationCode;
             await _db.SaveChangesAsync();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
-    }
-    public async Task<ConfirmUserEmailRespDto> ConfirmUserEmail(ConfirmEmailDto dto, short currentLanguageId)
-    {
-        try
-        {
-            XsportUser? oldEmailUser = await userManager.FindByEmailAsync(dto.Email);
-            bool isCorrect = false;
-            var jwtToken = new AuthResult();
-            if (oldEmailUser == null)
+            string resetPasswordToken = await userManager.GeneratePasswordResetTokenAsync(existingUser);
+            return new ResetPassworTokendDto()
             {
-                XsportUser? newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email) ??
-                    throw new Exception("User does not exist.");
-                isCorrect = await userManager.CheckPasswordAsync(newEmailUser, dto.Password);
-                if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
-                if (newEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
-                newEmailUser.Email = newEmailUser.NewEmail;
-                newEmailUser.NormalizedEmail = newEmailUser.NewEmail?.ToUpperInvariant();
-                newEmailUser.UserName = newEmailUser.Email;
-                newEmailUser.NormalizedUserName = newEmailUser.NewEmail?.ToUpperInvariant();
-                newEmailUser.NewEmail = null;
-                await _db.SaveChangesAsync();
-                jwtToken = await GenerateJwtToken(newEmailUser, GeneralConfig?.EnableTwoFactor ?? false);
-                UserProfileDto userProfile = await GetUserProfile(newEmailUser.Id, currentLanguageId);
-                return new ConfirmUserEmailRespDto()
-                {
-                    AuthResult = jwtToken,
-                    Sports = null,
-                    UserProfile = userProfile
-                };
-            }
-            isCorrect = await userManager.CheckPasswordAsync(oldEmailUser, dto.Password);
-            if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
-            if (oldEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
-            oldEmailUser.EmailConfirmed = true;
-            await _db.SaveChangesAsync();
-            jwtToken = await GenerateJwtToken(oldEmailUser, GeneralConfig?.EnableTwoFactor ?? false);
-            List<SportDto> sports = _db.Sports.Select(s => new SportDto()
-            {
-                SportId = s.SportId,
-                SportName = (s.SportTranslations
-                .SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
-            }).ToList();
-            return new ConfirmUserEmailRespDto()
-            {
-                AuthResult = jwtToken,
-                Sports = sports,
-                UserProfile = null
+                ResetPassworTokend = resetPasswordToken
             };
         }
         catch (Exception ex)
@@ -220,12 +170,128 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
     }
+
+    public async Task<bool> ResetPassword(ResetPasswordDto dto, short currentLanguageId)
+    {
+        try
+        {
+            var existingUser = await userManager.FindByEmailAsync(dto.Email) ??
+                throw new Exception(currentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.user_does_not_exist_en :
+                UserServiceErrors.user_does_not_exist_ar);
+            if (dto.Code != existingUser.ResetPasswordCode)
+                throw new Exception(
+                    currentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.Err_reset_password_code_en :
+                    UserServiceErrors.Err_reset_password_code_ar);
+            var isRest = await userManager.ResetPasswordAsync(
+                existingUser, dto.ResetPassworToken, dto.NewPassword);
+            if (!isRest.Succeeded)
+            {
+                string errorMessage = string.Empty;
+                foreach (var item in isRest.Errors)
+                {
+                    errorMessage = "__" + errorMessage + item.Description + "\n";
+                }
+
+                throw new Exception(errorMessage);
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    //public async Task<bool> ResendEmailConfirmationCode(UserLoginRequest dto)
+    //{
+    //    try
+    //    {
+    //        var oldEmailUser = await userManager.FindByEmailAsync(dto.Email);
+    //        string code = string.Empty;
+    //        if (oldEmailUser == null)
+    //        {
+    //            var newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email) ??
+    //                throw new Exception("User does not exist.");
+    //            code = await SendActivationCode(dto.Email);
+    //            if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
+    //            newEmailUser.EmailConfirmationCode = code;
+    //            await _db.SaveChangesAsync();
+    //            return true;
+    //        }
+    //        code = await SendActivationCode(dto.Email);
+    //        if (code.IsNullOrEmpty()) throw new Exception("Confirmation code could not be generated.");
+    //        oldEmailUser.EmailConfirmationCode = code;
+    //        await _db.SaveChangesAsync();
+    //        return true;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new Exception(ex.Message);
+    //    }
+    //}
+    //public async Task<ConfirmUserEmailRespDto> ConfirmUserEmail(ConfirmEmailDto dto, short currentLanguageId)
+    //{
+    //    try
+    //    {
+    //        XsportUser? oldEmailUser = await userManager.FindByEmailAsync(dto.Email);
+    //        bool isCorrect = false;
+    //        var jwtToken = new AuthResult();
+    //        if (oldEmailUser == null)
+    //        {
+    //            XsportUser? newEmailUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.Email) ??
+    //                throw new Exception("User does not exist.");
+    //            isCorrect = await userManager.CheckPasswordAsync(newEmailUser, dto.Password);
+    //            if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
+    //            if (newEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
+    //            newEmailUser.Email = newEmailUser.NewEmail;
+    //            newEmailUser.NormalizedEmail = newEmailUser.NewEmail?.ToUpperInvariant();
+    //            newEmailUser.UserName = newEmailUser.Email;
+    //            newEmailUser.NormalizedUserName = newEmailUser.NewEmail?.ToUpperInvariant();
+    //            newEmailUser.NewEmail = null;
+    //            await _db.SaveChangesAsync();
+    //            jwtToken = await GenerateJwtToken(newEmailUser, GeneralConfig?.EnableTwoFactor ?? false);
+    //            UserProfileDto userProfile = await GetUserProfile(newEmailUser.Id, currentLanguageId);
+    //            return new ConfirmUserEmailRespDto()
+    //            {
+    //                AuthResult = jwtToken,
+    //                Sports = null,
+    //                UserProfile = userProfile
+    //            };
+    //        }
+    //        isCorrect = await userManager.CheckPasswordAsync(oldEmailUser, dto.Password);
+    //        if (!isCorrect) throw new Exception("Operation can not be completed, wrong password");
+    //        if (oldEmailUser.EmailConfirmationCode != dto.Code) throw new Exception("Confirmation code is incorrect.");
+    //        oldEmailUser.EmailConfirmed = true;
+    //        await _db.SaveChangesAsync();
+    //        jwtToken = await GenerateJwtToken(oldEmailUser, GeneralConfig?.EnableTwoFactor ?? false);
+    //        List<SportDto> sports = _db.Sports.Select(s => new SportDto()
+    //        {
+    //            SportId = s.SportId,
+    //            SportName = (s.SportTranslations
+    //            .SingleOrDefault(t => t.LanguageId == currentLanguageId).Name) ?? string.Empty,
+    //        }).ToList();
+    //        return new ConfirmUserEmailRespDto()
+    //        {
+    //            AuthResult = jwtToken,
+    //            Sports = sports,
+    //            UserProfile = null
+    //        };
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new Exception(ex.Message);
+    //    }
+    //}
     public async Task<LoginResponseDto> LoginAsync(UserLoginRequest user, short currentLanguageId)
     {
         try
         {
             _logger.LogInfo($"User with email = ${user.Email} trying to login.");
-            var existingUser = await userManager.FindByEmailAsync(user.Email) ?? throw new Exception("User does not exist");
+            var existingUser = await userManager.FindByEmailAsync(user.Email) ??
+                throw new Exception(currentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.user_does_not_exist_en :
+                UserServiceErrors.user_does_not_exist_ar);
             var isLockout = await userManager.IsLockedOutAsync(existingUser);
             if (isLockout)
                 throw new Exception("User is locked out");
@@ -278,32 +344,49 @@ public class UserServices : IUserServices
         }
         try
         {
+            if (dto.Email.IsNullOrEmpty()) throw new Exception(
+                currentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.required_email_en :
+                UserServiceErrors.required_email_ar);
             var existingUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Uid == Uid);
             if (existingUser == null)
             {
-                XsportUser xsportUser = new XsportUser()
+                existingUser = await userManager.FindByEmailAsync(dto.Email);
+                if (existingUser == null)
                 {
-                    Uid = Uid,
-                    Email = dto.Email,
-                    EmailConfirmed = true,
-                    UserName = dto.Email,
-                    XsportName = dto.Name,
-                    PhoneNumber = dto.Phone,
-                    LoyaltyPoints = 0,
-                    Gender = dto.Gender,
-                    Latitude = dto.Latitude,
-                    Longitude = dto.Longitude,
-                    ImagePath = "",
-                    AuthenticationProvider = "Google"
-                };
-                var isCreated = await userManager.CreateAsync(xsportUser);
-                if (!isCreated.Succeeded) throw new Exception("User could not be created successfully.");
-                var jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
-                return new LoginResponseDto
+                    XsportUser xsportUser = new XsportUser()
+                    {
+                        Uid = Uid,
+                        Email = dto.Email,
+                        EmailConfirmed = true,
+                        UserName = dto.Email,
+                        XsportName = dto.Name,
+                        PhoneNumber = dto.Phone,
+                        LoyaltyPoints = 0,
+                        ImagePath = "",
+                        AuthenticationProvider = "Google",
+                        RegistrationStatus = (short)RegistrationStatusEnum.registredWithGoogle,
+                    };
+                    var isCreated = await userManager.CreateAsync(xsportUser);
+                    if (!isCreated.Succeeded) throw new Exception("User could not be created successfully.");
+                    var jwtToken = await GenerateJwtToken(xsportUser, GeneralConfig?.EnableTwoFactor ?? false);
+                    return new LoginResponseDto
+                    {
+                        AuthResult = jwtToken,
+                        UserProfile = null
+                    };
+                }
+                else
                 {
-                    AuthResult = jwtToken,
-                    UserProfile = null
-                };
+                    var jwtToken = await GenerateJwtToken(existingUser, GeneralConfig?.EnableTwoFactor ?? false);
+                    var userProfile = await GetUserProfile(existingUser.Id, currentLanguageId);
+                    return new LoginResponseDto
+                    {
+                        AuthResult = jwtToken,
+                        UserProfile = userProfile
+                    };
+                }
+
             }
             else
             {
@@ -321,6 +404,74 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
     }
+    public async Task<AuthResult> CompleteGoogleRegistrationAsync(
+        long uId, CompleteGoogleRegistrationDto dto, short currentLanguageId)
+    {
+        try
+        {
+            var existingUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Id == uId) ?? throw new Exception(
+                (currentLanguageId == (short)LanguagesEnum.English) ?
+                UserServiceErrors.user_does_not_exist_en :
+                UserServiceErrors.user_does_not_exist_ar);
+            existingUser.XsportName = dto.Name;
+            existingUser.PhoneNumber = dto.Phone;
+            existingUser.RegistrationStatus = (short)RegistrationStatusEnum.comletedRegistrationWithGoogle;
+            await _db.SaveChangesAsync();
+            AuthResult jwtToken = await GenerateJwtToken(existingUser, GeneralConfig?.EnableTwoFactor ?? false);
+            return jwtToken;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<UserProfileDto> UploadProfilePicture(long uId, UploadProfilePictureDto dto, short currentLanguageId)
+    {
+        try
+        {
+            XsportUser? user = await _db.XsportUsers.Where(u => u.Id == uId)
+                .Include(u => u.UserSports)
+                .FirstOrDefaultAsync() ??
+                throw new Exception(
+                    currentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.user_does_not_exist_en :
+                    UserServiceErrors.user_does_not_exist_ar);
+            if (dto.File == null) throw new Exception(
+                                    currentLanguageId == (short)LanguagesEnum.English ?
+                                    UserServiceErrors.profilepicture_required_en :
+                                    UserServiceErrors.profilepicture_required_ar);
+            string img = await Utils.UploadImageFileAsync(dto.File, user.Id, webHostEnvironment);
+            user.ImagePath = img;
+            user.RegistrationStatus = (short)RegistrationStatusEnum.RegistrationFinished;
+            await _db.SaveChangesAsync();
+            return await GetUserProfile(uId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+    public async Task<UserProfileDto> SkipProfilePicture(long uId, short currentLanguageId)
+    {
+        try
+        {
+            XsportUser? user = await _db.XsportUsers.Where(u => u.Id == uId)
+                .Include(u => u.UserSports)
+                .FirstOrDefaultAsync() ??
+                throw new Exception(
+                    currentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.user_does_not_exist_en :
+                    UserServiceErrors.user_does_not_exist_ar);
+            user.RegistrationStatus = (short)RegistrationStatusEnum.profilePictureSkipped;
+            await _db.SaveChangesAsync();
+            return await GetUserProfile(uId, currentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+    }
+
     public async Task<UserProfileDto> CompleteRegistration(long uId, CompleteRegistrationDto dto, short currentLanguageId)
     {
         try
@@ -328,7 +479,10 @@ public class UserServices : IUserServices
             XsportUser? user = await _db.XsportUsers.Where(u => u.Id == uId)
                 .Include(u => u.UserSports)
                 .FirstOrDefaultAsync() ??
-                throw new Exception(UserServiceErrors.user_does_not_exist);
+                throw new Exception(
+                    currentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.user_does_not_exist_en :
+                    UserServiceErrors.user_does_not_exist_ar);
             //var isCorrect = await userManager.CheckPasswordAsync(user, dto.Password);
             //if (!isCorrect) throw new Exception("Incorrect password.");
             string img = string.Empty;
@@ -376,11 +530,13 @@ public class UserServices : IUserServices
         {
             throw new Exception(ex.Message);
         }
-        if (user == null) throw new Exception(UserServiceErrors.user_does_not_exist);
-        if (!user.EmailConfirmed) throw new Exception("Please, confirm your account.");
-        if (user.UserSports == null || user.UserSports.Count == 0) throw new Exception("Please, Add at least one Favorite Sport!");
-        UserSport? userSport = user.UserSports.Where(userSport => userSport.IsCurrentState)?.FirstOrDefault();
-        if (userSport == null)
+        if (user == null) throw new Exception(
+            currentLanguageId == (short)LanguagesEnum.English ?
+            UserServiceErrors.user_does_not_exist_en :
+            UserServiceErrors.user_does_not_exist_ar);
+        //if (user.UserSports == null || user.UserSports.Count == 0) throw new Exception("Please, Add at least one Favorite Sport!");
+        UserSport? userSport = user.UserSports?.Where(userSport => userSport.IsCurrentState)?.FirstOrDefault();
+        if (userSport == null && user.UserSports?.Count > 0)
         {
             userSport = user.UserSports?.OrderBy(userSport => userSport.UserSportId).FirstOrDefault();
             userSport!.IsCurrentState = true;
@@ -398,9 +554,7 @@ public class UserServices : IUserServices
                 UserId = user.Id,
                 Name = user.XsportName,
                 Email = user.Email,
-                NewEmail = user.NewEmail,
                 Phone = user.PhoneNumber,
-                Gender = user.Gender,
                 LoyaltyPoints = user.LoyaltyPoints,
                 Longitude = user.Longitude,
                 Latitude = user.Latitude,
@@ -471,7 +625,6 @@ public class UserServices : IUserServices
             user.PhoneNumber = dto.Phone;
             user.Latitude = dto.Latitude;
             user.Longitude = dto.Longitude;
-            user.Gender = dto.Gender;
             user.ImagePath = img;
             await _db.SaveChangesAsync();
             return await GetUserProfile(uId, currentLanguageId);
@@ -496,27 +649,21 @@ public class UserServices : IUserServices
             throw new Exception(ex.Message);
         }
     }
-    public async Task<bool> ChangeEmail(XsportUser user, ChangeEmailDto dto)
+
+    public async Task<bool> ChangeEmail(XsportUser user, ChangeEmailDto dto, short currentLanguageId)
     {
         try
         {
-            if (dto.NewEmail == user.Email)
-                throw new Exception("New Email is the same as the old one.");
-            if (dto.NewEmail == user.NewEmail)
-                throw new Exception("You did not change the Email. Please, confirme the email.");
-            XsportUser? xsportUser = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Email == user.NewEmail);
-            if (xsportUser != null) throw new Exception("Email is already taken.");
-            XsportUser? xsportUserNewEmail = await _db.XsportUsers.SingleOrDefaultAsync(u => u.NewEmail == dto.NewEmail);
-            if (xsportUserNewEmail != null) throw new Exception("Email is already taken.");
-            XsportUser u = await _db.XsportUsers.SingleOrDefaultAsync(u => u.Id == user.Id) ??
-                throw new Exception("User does not exist.");
-            string confirmationCode = GenerateEmailConfirmationCode();
-            var message = new Message(
-                new List<string>() { dto.NewEmail ?? string.Empty },
-                "Account Confirmation", confirmationCode, null);
-            await emailService.SendEmailAsync(message);
-            u.NewEmail = dto.NewEmail;
-            u.EmailConfirmationCode = confirmationCode;
+            var existingUser = await userManager.FindByEmailAsync(dto.NewEmail);
+            if (existingUser != null)
+                throw new Exception(
+                    currentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.email_taken_en :
+                    UserServiceErrors.email_taken_ar);
+            user.Email = dto.NewEmail;
+            user.NormalizedEmail = dto.NewEmail.ToUpperInvariant();
+            user.UserName = dto.NewEmail;
+            user.NormalizedUserName = dto.NewEmail.ToUpperInvariant();
             await _db.SaveChangesAsync();
             return true;
         }
