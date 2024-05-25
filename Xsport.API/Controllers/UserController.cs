@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Swashbuckle.AspNetCore.Annotations;
+using Xsport.Common.Emuns;
+using Xsport.Common.Enums;
 using Xsport.Common.Models;
 using Xsport.Core;
 using Xsport.DTOs.UserDtos;
@@ -25,7 +27,7 @@ public class UserController : BaseController
     }
 
     [HttpPost]
-    public async Task<bool> Register([FromBody] UserRegistrationDto user)
+    public async Task<AuthResult> Register([FromBody] UserRegistrationDto user)
     {
         if (ModelState.IsValid)
         {
@@ -40,56 +42,44 @@ public class UserController : BaseController
         }
         else
         {
-            throw new ApiException("Invalid Inputs", 500);
-        }
-    }
-    [HttpPost]
-    public async Task<short> AccountStatus([FromBody] AccountStatusDto dto)
-    {
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                return await _userServices.AccountStatus(dto);
-            }
-            catch (Exception ex)
-            {
-                throw new ApiException(ex.Message, 500);
-            }
-        }
-        else
-        {
-            throw new ApiException("Invalid Inputs", 500);
+            throw new ApiException(
+                CurrentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.invalid_inputs_en :
+                UserServiceErrors.invalid_inputs_ar, 500);
         }
     }
 
     [HttpPost]
-    public async Task<bool> ResendEmailConfirmationCode([FromBody] UserLoginRequest dto)
+    public async Task<ResetPassworTokendDto> ForgotPassword([FromBody] ForgotPasswordDto dto)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                return await _userServices.ResendEmailConfirmationCode(dto);
+                return await _userServices.ForgotPassword(dto, CurrentLanguageId);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 throw new ApiException(ex.Message, 500);
             }
         }
         else
         {
-            throw new ApiException("Invalid Inputs", 500);
+            throw new ApiException(
+                CurrentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.invalid_inputs_en :
+                UserServiceErrors.invalid_inputs_ar, 500);
         }
     }
+
     [HttpPost]
-    public async Task<ConfirmUserEmailRespDto> ConfirmUserEmail([FromBody] ConfirmEmailDto dto)
+    public async Task<bool> ResetPassword([FromBody] ResetPasswordDto dto)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                return await _userServices.ConfirmUserEmail(dto, CurrentLanguageId);
+                return await _userServices.ResetPassword(dto, CurrentLanguageId);
             }
             catch (Exception ex)
             {
@@ -98,9 +88,113 @@ public class UserController : BaseController
         }
         else
         {
-            throw new ApiException("Invalid Inputs", 500);
+            throw new ApiException(
+                CurrentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.invalid_inputs_en :
+                UserServiceErrors.invalid_inputs_ar, 500);
         }
     }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<UserProfileDto> UploadProfilePicture([FromForm] UploadProfilePictureDto dto)
+    {
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                if (LoggedInUser == null) throw new ApiException(
+                    CurrentLanguageId == (short)LanguagesEnum.English ?
+                    UserServiceErrors.not_loggedin_en :
+                    UserServiceErrors.not_loggedin_ar);
+                return await _userServices.UploadProfilePicture(LoggedInUser.Id, dto, CurrentLanguageId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException(ex.Message, 500);
+            }
+        }
+        else
+        {
+            throw new ApiException(
+                CurrentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.invalid_inputs_en :
+                UserServiceErrors.invalid_inputs_ar, 500);
+        }
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpGet]
+    public async Task<UserProfileDto> SkipProfilePicture()
+    {
+        try
+        {
+            if (LoggedInUser == null) throw new ApiException(
+                CurrentLanguageId == (short)LanguagesEnum.English ?
+                UserServiceErrors.not_loggedin_en :
+                UserServiceErrors.not_loggedin_ar, 500);
+            return await _userServices.SkipProfilePicture(LoggedInUser.Id, CurrentLanguageId);
+        }
+        catch (Exception ex)
+        {
+            throw new ApiException(ex.Message, 500);
+        }
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost]
+    public async Task<short> AccountStatus()
+    {
+        try
+        {
+            if (LoggedInUser == null) return (short)RegistrationStatusEnum.unKown;
+            return await _userServices.AccountStatus(LoggedInUser);
+        }
+        catch (Exception ex)
+        {
+            throw new ApiException(ex.Message, 500);
+        }
+    }
+
+    //[HttpPost]
+    //public async Task<bool> ResendEmailConfirmationCode([FromBody] UserLoginRequest dto)
+    //{
+    //    if (ModelState.IsValid)
+    //    {
+    //        try
+    //        {
+    //            return await _userServices.ResendEmailConfirmationCode(dto);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            throw new ApiException(ex.Message, 500);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        throw new ApiException("Invalid Inputs", 500);
+    //    }
+    //}
+
+    //[HttpPost]
+    //public async Task<ConfirmUserEmailRespDto> ConfirmUserEmail([FromBody] ConfirmEmailDto dto)
+    //{
+    //    if (ModelState.IsValid)
+    //    {
+    //        try
+    //        {
+    //            return await _userServices.ConfirmUserEmail(dto, CurrentLanguageId);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            throw new ApiException(ex.Message, 500);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        throw new ApiException("Invalid Inputs", 500);
+    //    }
+    //}
     [HttpPost]
     public async Task<LoginResponseDto> Login([FromBody] UserLoginRequest userLoginRequest)
     {
@@ -140,21 +234,21 @@ public class UserController : BaseController
         }
     }
     //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [HttpPost]
-    public async Task<UserProfileDto> CompleteRegistration([FromForm] CompleteRegistrationDto dto)
-    {
-        try
-        {
-            if (LoggedInUser == null) throw new ApiException("You are not logged in");
-            var res = await _userServices.CompleteRegistration(LoggedInUser.Id, dto, CurrentLanguageId);
-            return res;
-        }
-        catch (Exception ex)
-        {
-            throw new ApiException(ex.Message, 500);
-        }
-    }
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[HttpPost]
+    //public async Task<UserProfileDto> CompleteRegistration([FromForm] CompleteRegistrationDto dto)
+    //{
+    //    try
+    //    {
+    //        if (LoggedInUser == null) throw new ApiException("You are not logged in");
+    //        var res = await _userServices.CompleteRegistration(LoggedInUser.Id, dto, CurrentLanguageId);
+    //        return res;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        throw new ApiException(ex.Message, 500);
+    //    }
+    //}
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpGet]
     public async Task<UserProfileDto> GetUserProfile()
@@ -170,6 +264,7 @@ public class UserController : BaseController
             throw new ApiException(ex.Message, 500);
         }
     }
+
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost]
     public async Task<UserProfileDto> EditUserProfile([FromForm] EditUserReqDto dto)
@@ -222,7 +317,7 @@ public class UserController : BaseController
             try
             {
                 if (LoggedInUser == null) throw new ApiException("You are not logged in", 500);
-                return await _userServices.ChangeEmail(LoggedInUser, dto);
+                return await _userServices.ChangeEmail(LoggedInUser, dto, CurrentLanguageId);
             }
             catch (Exception ex)
             {

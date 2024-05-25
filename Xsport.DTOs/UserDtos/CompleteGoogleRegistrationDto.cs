@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace Xsport.DTOs.UserDtos
 {
-    public class UserGoogleLoginDto
+    public class CompleteGoogleRegistrationDto
     {
         [Required]
-        public string FirebaseToken { get; set; } = null!;
-        public string? Name { get; set; } = null!;
+        public string Name { get; set; } = null!;
         [Required]
-        public string Email { get; set; } = null!;
-        public string? Phone { get; set; }
+        public string Phone { get; set; } = null!;
     }
 }
