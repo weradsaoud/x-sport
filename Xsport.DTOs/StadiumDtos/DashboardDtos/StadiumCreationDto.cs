@@ -15,7 +15,7 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
         public DashboardStadiumFloorsDto? Floors { get; set; }
         public DashboardStadiumMultimediaDto? Multimedia { get; set; }
         public DashboardStadiumServicesDto? Services { get; set; }
-        public DashboardStaduimWorkingDaysDto? WorkingDays { get; set; }
+        public List<DashboardStadiumWorkingDayDto> WorkingDays { get; set; }
 
     }
 
@@ -28,7 +28,7 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
         public List<string> Photos { get; set; } = null!;
         public List<string> Videos { get; set; } = null!;
         public DashboardStadiumServicesDto? Services { get; set; }
-        public DashboardStaduimWorkingDaysDto? WorkingDays { get; set; }
+        public List<DashboardStadiumWorkingDayDto> WorkingDays { get; set; }
     }
 
     public class DashboardStadiumDiscriptionDto
@@ -54,12 +54,25 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
     public class DashboardStadiumFloorDto
     {
         public long StadiumFloorId { get; set; }
+        public long FloorId { get; set; }
+        public bool IsCovered { get; set; }
         public decimal Price { get; set; }
+    }
+    public class DashboardStadiumFloorPriceDto
+    {
+        public long StadiumFloorId { get; set; }
+        public decimal Price { get; set; }
+    }
+
+    public class DashboardStadiumFloorCreationDto
+    {
+        public bool IsCovered { get; set; }
+        public long FloorId { get; set; }
     }
 
     public class DashboardStadiumFloorsDto
     {
-        public List<long> FloorIds { get; set; } = null!;
+        public List<DashboardStadiumFloorCreationDto> Floors { get; set; } = null!;
     }
     public class FloorDto
     {
@@ -67,6 +80,30 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
         public int NumOfPlayers { get; set; }
     }
 
+    public class DashboardStadiumWorkingDaysDto
+    {
+        public List<DashboardGeneralWorkingDayDto> StadiumWorkingDays { get; set; } = null!;
+    }
+
+    public class DashboardPaymentInfoDto
+    {
+        public long PaymentType { get; set; }
+        public string CardNumber { get; set; } = null!;
+    }
+
+    public class DashboardGeneralWorkingDayDto
+    {
+        public long WorkingDayId { get; set; }
+        public string OpenAt { get; set; } = null!;
+        public string CloseAt { get; set; } = null!;
+    }
+    public class ServiceDto
+    {
+        public long ServiceId { get; set; }
+
+        public string? ServiceName { get; set; }
+        public string? ImgPath { get; set; }
+    }
     public class StadiumFloorDto
     {
         public long FloorId { get; set; }
@@ -91,10 +128,10 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
         public List<long> ServicesIds { get; set; } = null!;
     }
 
-    public class DashboardStaduimWorkingDaysDto
-    {
-        public List<DashboardStadiumWorkingDayDto> StadiumWorkingDays { get; set; } = null!;
-    }
+    //public class DashboardStaduimWorkingDaysDto
+    //{
+    //    public List<DashboardStadiumWorkingDayDto> StadiumWorkingDays { get; set; } = null!;
+    //}
     public class DashboardStadiumWorkingDayDto
     {
         public long? WorkingDayId { get; set; }

@@ -36,8 +36,8 @@ namespace Xsport.DB.QueryObjects
                     NumOfReviews = stadium.StadiumReviews.Count(),
                     Evaluation = stadium.StadiumReviews.Count() > 0 ?
                     stadium.StadiumReviews.Select(r => r.Evaluation).Average() : 0,
-                    Lat = stadium.Latitude,
-                    Long = stadium.Longitude,
+                    Lat = stadium.Latitude ?? 0,
+                    Long = stadium.Longitude ?? 0,
                     StadiumWorkDays = stadium.StadiumWorkingDays.Select(sw => new StadiumWorkDay()
                     {
                         DayOrder = sw.WorkingDay.OrderInWeek,

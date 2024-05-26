@@ -14,6 +14,7 @@ namespace Xsport.DTOs.StadiumDtos.DashboardDtos
     public class StadiumProcessCreationDto
     {
         public long ProcessId { get; set; }
+        public string CurrentStep { get; set; }
         public StadiumDashboardDto? DashboardData { get; set; }
     }
 }
