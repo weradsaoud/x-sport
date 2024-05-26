@@ -9,6 +9,8 @@ namespace Xsport.DB.Entities
     public class StadiumFloor
     {
         public long StadiumFloorId { get; set; }
+        public decimal Price { get; set; }
+        public bool IsCovered { get; set; }
 
         //foriegn keys
         public long StadiumId { get; set; }

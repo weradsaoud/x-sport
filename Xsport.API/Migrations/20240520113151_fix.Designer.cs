@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.DB;
@@ -11,9 +12,11 @@ using Xsport.DB;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240520113151_fix")]
+    partial class fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -974,9 +977,6 @@ namespace Xsport.API.Migrations
                     b.Property<long?>("AcademyId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool?>("IsComplete")
-                        .HasColumnType("boolean");
-
                     b.Property<decimal?>("Latitude")
                         .HasColumnType("numeric");
 
@@ -998,9 +998,8 @@ namespace Xsport.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("CurrentStep")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("CurrentStep")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
@@ -1028,9 +1027,6 @@ namespace Xsport.API.Migrations
 
                     b.Property<long>("FloorId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("IsCovered")
-                        .HasColumnType("boolean");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -1406,8 +1402,14 @@ namespace Xsport.API.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("EmailConfirmationCode")
+                        .HasColumnType("text");
+
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("text");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
@@ -1427,6 +1429,9 @@ namespace Xsport.API.Migrations
                     b.Property<int>("LoyaltyPoints")
                         .HasColumnType("integer");
 
+                    b.Property<string>("NewEmail")
+                        .HasColumnType("text");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -1443,12 +1448,6 @@ namespace Xsport.API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<short>("RegistrationStatus")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("ResetPasswordCode")
-                        .HasColumnType("text");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");

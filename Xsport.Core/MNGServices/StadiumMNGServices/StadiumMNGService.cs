@@ -29,7 +29,7 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
         {
             try
             {
-                Academy? academy = dto.AcademyId.HasValue ? await _repManager.AcademyRepository
+                Academy? academy = (dto.AcademyId.HasValue && dto.AcademyId != 0) ? await _repManager.AcademyRepository
                     .FindByCondition(a => a.AcademyId == dto.AcademyId, false)
                     .SingleOrDefaultAsync() ?? throw new Exception("Academy does not exist.") : null;
                 Stadium stadium = new Stadium()
@@ -49,10 +49,10 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                         Description = dto.EnDescription,
                     }
                 },
-                    AcademyId = dto.AcademyId,
+                    AcademyId = academy?.AcademyId,
                     Latitude = dto.Lat,
                     Longitude = dto.Long,
-                    Price = dto.Price
+                    //Price = dto.Price
                 };
                 await _repManager.StadiumRepository.CreateAsync(stadium);
                 await _repManager.StadiumRepository.SaveChangesAsync();
@@ -166,6 +166,8 @@ namespace Xsport.Core.MNGServices.StadiumMNGServices
                 {
                     StadiumId = dto.StadiumId,
                     FloorId = floor.FloorId,
+                    Price = dto.Price
+
                 };
                 await _repManager.StadiumFloorRepository.CreateAsync(stadiumFloor);
                 await _repManager.StadiumFloorRepository.SaveChangesAsync();

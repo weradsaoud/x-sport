@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Xsport.DB;
@@ -11,9 +12,11 @@ using Xsport.DB;
 namespace Xsport.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240515122427_remove-price-from-stadium")]
+    partial class removepricefromstadium
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -624,6 +627,7 @@ namespace Xsport.API.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("FilePath")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsCover")
@@ -974,9 +978,6 @@ namespace Xsport.API.Migrations
                     b.Property<long?>("AcademyId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool?>("IsComplete")
-                        .HasColumnType("boolean");
-
                     b.Property<decimal?>("Latitude")
                         .HasColumnType("numeric");
 
@@ -990,34 +991,6 @@ namespace Xsport.API.Migrations
                     b.ToTable("Stadiums");
                 });
 
-            modelBuilder.Entity("Xsport.DB.Entities.StadiumCreationProcess", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("CurrentStep")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("StadiumId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StadiumId");
-
-                    b.ToTable("StadiumCreationProcesses");
-                });
-
             modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>
                 {
                     b.Property<long>("StadiumFloorId")
@@ -1028,9 +1001,6 @@ namespace Xsport.API.Migrations
 
                     b.Property<long>("FloorId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("IsCovered")
-                        .HasColumnType("boolean");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -1112,12 +1082,14 @@ namespace Xsport.API.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("StadiumTranslationId"));
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("LanguageId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("StadiumId")
@@ -1406,8 +1378,14 @@ namespace Xsport.API.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("EmailConfirmationCode")
+                        .HasColumnType("text");
+
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("text");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("text");
@@ -1427,6 +1405,9 @@ namespace Xsport.API.Migrations
                     b.Property<int>("LoyaltyPoints")
                         .HasColumnType("integer");
 
+                    b.Property<string>("NewEmail")
+                        .HasColumnType("text");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -1443,12 +1424,6 @@ namespace Xsport.API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
-
-                    b.Property<short>("RegistrationStatus")
-                        .HasColumnType("smallint");
-
-                    b.Property<string>("ResetPasswordCode")
-                        .HasColumnType("text");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
@@ -1979,17 +1954,6 @@ namespace Xsport.API.Migrations
                         .HasForeignKey("AcademyId");
 
                     b.Navigation("Academy");
-                });
-
-            modelBuilder.Entity("Xsport.DB.Entities.StadiumCreationProcess", b =>
-                {
-                    b.HasOne("Xsport.DB.Entities.Stadium", "Stadium")
-                        .WithMany()
-                        .HasForeignKey("StadiumId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Stadium");
                 });
 
             modelBuilder.Entity("Xsport.DB.Entities.StadiumFloor", b =>

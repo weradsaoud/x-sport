@@ -10,7 +10,7 @@ namespace Xsport.DB.Entities
     public class Mutimedia
     {
         public long MutimediaId { get; set; }
-        public string FilePath { get; set; } = null!;
+        public string? FilePath { get; set; } = null!;
         public bool IsVideo { get; set; }
         public bool IsCover { get; set; }
 

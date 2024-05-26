@@ -9,6 +9,8 @@ namespace Xsport.DTOs.StadiumDtos.MNGDtos
 {
     public class StadiumFloorDto
     {
+        [Required] public int Id { get; set; }
+        [Required] public decimal Price { get; set; }
         [Required]
         public long StadiumId { get; set; }
         [Required]

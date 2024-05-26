@@ -88,7 +88,7 @@ namespace Xsport.Core.StadiumServices
                             Id = sf.FloorId,
                             Name = sf.Floor.FloorTranslations.Single(t => t.LanguageId == currentLanguageId).Name,
                         }).ToList(),
-                        Price = s.Price,
+                        //Price = s.Price,
                         OpenAt = s.StadiumWorkingDays
                         .Single(wd => wd.WorkingDay.OrderInWeek == (int)DateTime.Today.DayOfWeek)
                         .OpenAt.ToString(XsportConstants.TimeOnlyFormat),
