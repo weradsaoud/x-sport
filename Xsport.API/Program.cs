@@ -199,13 +199,14 @@ builder.Services.AddScoped<IAgeCategoryMNGService, AgeCategoryMNGService>();
 builder.Services.AddScoped<ICourseMNGService, CourseMNGService>();
 builder.Services.AddScoped<IFloorMNGService, FloorMNGService>();
 builder.Services.AddScoped<IRelativeMNGService, RelativeMNGService>();
-builder.Services.AddScoped<IGenderMNGService, GenderMNGService>();
 builder.Services.AddScoped<IReservationSrvice, ReservationService>();
+builder.Services.AddScoped<IGenderMNGService, GenderMNGService>();
 builder.Services.AddScoped<IArchiveServices, ArchiveServices>();
 builder.Services.AddSingleton<IAuthorizationHandler, RoleHandler>();
 builder.Services.AddSingleton<IAuthorizationHandler, MatchingAcademyClaimHandler>();
 builder.Services.AddScoped<IDashboardUserServices, DashboardUserServices>();
 builder.Services.AddScoped<IDashboardStadiumServices, DashboardStadiumServices>();
+builder.Services.AddScoped<IDashboarScheduleServices, DashboarScheduleServices>();
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS",
     Path.Combine(Directory.GetCurrentDirectory(), "Firebase", "xsports-a951a-firebase-adminsdk-9t65q-203c04501e.json"));

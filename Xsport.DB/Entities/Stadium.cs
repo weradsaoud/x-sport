@@ -15,6 +15,8 @@ namespace Xsport.DB.Entities
         public bool? IsComplete { get; set; }
         //foriegn keys
         public long? AcademyId { get; set; }
+
+        public long? OwnerId { get; set; }
         //navigational props
         public ICollection<StadiumTranslation> StadiumTranslations { get; set; } = null!;
         public ICollection<Mutimedia> Mutimedias { get; set; } = null!;
@@ -23,5 +25,6 @@ namespace Xsport.DB.Entities
         public ICollection<StadiumReview> StadiumReviews { get; set; } = null!;
         public ICollection<StadiumFloor> StadiumFloors { get; set; } = null!;
         public Academy? Academy { get; set; } = null!;
+        public XsportUser? Owner { get; set; } = null!;
     }
 }
